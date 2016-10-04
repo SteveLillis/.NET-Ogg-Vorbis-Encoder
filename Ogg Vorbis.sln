@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OggVorbisEncoder", "OggVorbisEncoder\OggVorbisEncoder.csproj", "{3697F595-B0B3-4F47-B229-5DEB5B3A219E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OggVorbisEncoder.Example", "OggVorbisEncoder.Example\OggVorbisEncoder.Example.csproj", "{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|x64.ActiveCfg = Debug|x64
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|x64.Build.0 = Debug|x64
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|x86.ActiveCfg = Debug|x86
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Debug|x86.Build.0 = Debug|x86
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|x64.ActiveCfg = Release|x64
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|x64.Build.0 = Release|x64
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|x86.ActiveCfg = Release|x86
+		{3697F595-B0B3-4F47-B229-5DEB5B3A219E}.Release|x86.Build.0 = Release|x86
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|x64.ActiveCfg = Debug|x64
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|x64.Build.0 = Debug|x64
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|x86.ActiveCfg = Debug|x86
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Debug|x86.Build.0 = Debug|x86
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|x64.ActiveCfg = Release|x64
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|x64.Build.0 = Release|x64
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|x86.ActiveCfg = Release|x86
+		{8D30BE8B-D766-46D7-9392-2EBEB8F82AD8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
