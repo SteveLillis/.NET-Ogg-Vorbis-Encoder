@@ -5,7 +5,6 @@ namespace OggVorbisEncoder.Example
 {
     public class Encoder
     {
-        private const int Channels = 2;
         private const int SampleSize = 1024;
 
         [STAThread]
@@ -17,7 +16,7 @@ namespace OggVorbisEncoder.Example
             // StripWavHeader(stdin);
 
             // Stores all the static vorbis bitstream settings
-            var info = VorbisInfo.InitVariableBitRate(Channels, 44100, 0.1f);
+            var info = VorbisInfo.InitVariableBitRate(2, 44100, 0.1f);
 
             // set up our packet->stream encoder
             var serial = new Random().Next();
@@ -56,7 +55,7 @@ namespace OggVorbisEncoder.Example
             // =========================================================
             var processingState = ProcessingState.Create(info);
 
-            var buffer = new float[Channels][];
+            var buffer = new float[info.Channels][];
             buffer[0] = new float[SampleSize];
             buffer[1] = new float[SampleSize];
 
