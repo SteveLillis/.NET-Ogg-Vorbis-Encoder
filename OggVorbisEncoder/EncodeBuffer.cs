@@ -92,7 +92,6 @@ namespace OggVorbisEncoder
         {
             Array.Resize(ref _buffer, Bytes);
             return _buffer;
-            ;
         }
     }
 }

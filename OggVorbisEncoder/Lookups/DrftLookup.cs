@@ -284,14 +284,11 @@ namespace OggVorbisEncoder.Lookups
 
         private void dradf2(int ido, int l1, IList<float> cc, IList<float> ch, int wa1)
         {
-            int i, k;
-            float ti2, tr2;
-            int t1, t2, t3, t4, t5, t6;
-
-            t1 = 0;
-            var t0 = t2 = l1*ido;
-            t3 = ido << 1;
-            for (k = 0; k < l1; k++)
+            var t1 = 0;
+            var t2 = l1*ido;
+            var t0 = t2;
+            var t3 = ido << 1;
+            for (var k = 0; k < l1; k++)
             {
                 ch[t1 << 1] = cc[t1] + cc[t2];
                 ch[(t1 << 1) + t3 - 1] = cc[t1] - cc[t2];
@@ -306,20 +303,20 @@ namespace OggVorbisEncoder.Lookups
             {
                 t1 = 0;
                 t2 = t0;
-                for (k = 0; k < l1; k++)
+                for (var k = 0; k < l1; k++)
                 {
                     t3 = t2;
-                    t4 = (t1 << 1) + (ido << 1);
-                    t5 = t1;
-                    t6 = t1 + t1;
-                    for (i = 2; i < ido; i += 2)
+                    var t4 = (t1 << 1) + (ido << 1);
+                    var t5 = t1;
+                    var t6 = t1 + t1;
+                    for (var i = 2; i < ido; i += 2)
                     {
                         t3 += 2;
                         t4 -= 2;
                         t5 += 2;
                         t6 += 2;
-                        tr2 = _trigCache[wa1 + i - 2]*cc[t3 - 1] + _trigCache[wa1 + i - 1]*cc[t3];
-                        ti2 = _trigCache[wa1 + i - 2]*cc[t3] - _trigCache[wa1 + i - 1]*cc[t3 - 1];
+                        var tr2 = _trigCache[wa1 + i - 2]*cc[t3 - 1] + _trigCache[wa1 + i - 1]*cc[t3];
+                        var ti2 = _trigCache[wa1 + i - 2]*cc[t3] - _trigCache[wa1 + i - 1]*cc[t3 - 1];
                         ch[t6] = cc[t5] + ti2;
                         ch[t4] = ti2 - cc[t5];
                         ch[t6 - 1] = cc[t5 - 1] + tr2;
@@ -335,7 +332,7 @@ namespace OggVorbisEncoder.Lookups
 
             t3 = t2 = (t1 = ido) - 1;
             t2 += t0;
-            for (k = 0; k < l1; k++)
+            for (var k = 0; k < l1; k++)
             {
                 ch[t1] = -cc[t2];
                 ch[t1 - 1] = cc[t3];
@@ -360,7 +357,7 @@ namespace OggVorbisEncoder.Lookups
             var t0 = l1*ido;
             var t10 = ip*ido;
 
-            int idij, i, j, k, l, ik, t1, t2, t3, t4, t5, t6, t7, t8, t9;
+            int i, j, k, l, ik, t1, t2, t3, t4, t5, t6, t7, t8, t9;
 
             if (ido != 1)
             {
@@ -381,6 +378,7 @@ namespace OggVorbisEncoder.Lookups
 
                 var setting = -ido;
                 t1 = 0;
+                
                 if (nbd > l1)
                     for (j = 1; j < ip; j++)
                     {
@@ -389,7 +387,7 @@ namespace OggVorbisEncoder.Lookups
                         t2 = -ido + t1;
                         for (k = 0; k < l1; k++)
                         {
-                            idij = setting - 1;
+                            var idij = setting - 1;
                             t2 += ido;
                             t3 = t2;
                             for (i = 2; i < ido; i += 2)
@@ -405,7 +403,7 @@ namespace OggVorbisEncoder.Lookups
                     for (j = 1; j < ip; j++)
                     {
                         setting += ido;
-                        idij = setting - 1;
+                        var idij = setting - 1;
                         t1 += t0;
                         t2 = t1;
                         for (i = 2; i < ido; i += 2)
