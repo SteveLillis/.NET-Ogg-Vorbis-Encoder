@@ -3,7 +3,7 @@ using OggVorbisEncoder.Setup;
 
 namespace OggVorbisEncoder
 {
-    public class Headerbuffer
+    public class HeaderPacketBuilder
     {
         private const string VorbisString = "vorbis";
         private const string VendorString = "OggVorbisEncoder";

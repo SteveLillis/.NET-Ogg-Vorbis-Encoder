@@ -30,7 +30,7 @@ namespace OggVorbisEncoder.Example
             // most of the codec setup parameters) which is mandated by the Ogg
             // bitstream spec.  The second header holds any comment fields.  The
             // third header holds the bitstream codebook.
-            var headerBuilder = new Headerbuffer();
+            var headerBuilder = new HeaderPacketBuilder();
 
             var comments = new Comments();
             comments.AddTag("ARTIST", "TEST");
