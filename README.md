@@ -2,11 +2,11 @@
 
 .NET Ogg Vorbis Encoder
 =======================
-This is an [Ogg Vorbis](https://xiph.org/vorbis/) audio encoding library, written entirely in managed code.
+An [Ogg Vorbis](https://xiph.org/vorbis/) audio encoding library written entirely in managed code.
 
 How to use
 ----------
-For an overview of how to use the library see  [the included example](OggVorbisEncoder.Example/Encoder.cs).
+See [the included example](OggVorbisEncoder.Example/Encoder.cs).
 
 Limitations
 -----------
