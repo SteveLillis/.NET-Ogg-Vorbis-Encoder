@@ -1,3 +1,5 @@
+[Available on NuGet](https://www.nuget.org/packages/OggVorbisEncoder/)
+
 .NET Ogg Vorbis Encoder
 =======================
 This is a managed code [Ogg Vorbis](https://xiph.org/vorbis/) audio encoder implementation.  
