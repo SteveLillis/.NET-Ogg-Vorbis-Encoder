@@ -10,4 +10,4 @@ See [the included example](OggVorbisEncoder.Example/Encoder.cs).
 
 Limitations
 -----------
- - Currently only supports **44.1k Stereo VBR** encoding.  If you need another format, let me know.
+ - Currently only supports **40k+ Stereo VBR** encoding.  If you need another format, let me know.
