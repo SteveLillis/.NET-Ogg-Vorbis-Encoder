@@ -12,4 +12,4 @@ For a demonstration of how to implement the encoder library, see [the included e
 
 Limitations
 -----------
- - Currently only supports **40k+ Stereo VBR** encoding.  If you need another format, let me know.
+ - Currently only supports **40k+ Stereo VBR** encoding.  If you need another format you just need to add the required setup data, feel free to contact me for more information.
