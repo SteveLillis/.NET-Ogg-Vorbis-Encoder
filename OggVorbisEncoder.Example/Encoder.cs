@@ -102,7 +102,7 @@ namespace OggVorbisEncoder.Example
         }
 
         /// <summary>
-        ///     we cheat on the WAV header; we just bypass the header and never
+        ///     We cheat on the WAV header; we just bypass the header and never
         ///     verify that it matches 16bit/stereo/44.1kHz.This is just an
         ///     example, after all.
         /// </summary>

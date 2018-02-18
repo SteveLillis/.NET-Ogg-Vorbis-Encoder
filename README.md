@@ -2,13 +2,14 @@
 
 .NET Ogg Vorbis Encoder
 =======================
-An [Ogg Vorbis](https://xiph.org/vorbis/) audio encoding library written entirely in managed code.
+A .NET Core [Ogg Vorbis](https://xiph.org/vorbis/) audio encoding library written entirely in managed code.
 
 How to use
 ----------
 The code makes heavy use of C# 6 features, so you'll need Visual Studio 2015 or later if you want to work with the source.  You can [download the free Community edition here](https://www.microsoft.com/en-us/download/details.aspx?id=48146).
 
-For a demonstration of how to implement the encoder library, see [the included example](OggVorbisEncoder.Example/Encoder.cs).
+For a demonstration of how to implement the encoder library, see [the included example](OggVorbisEncoder.Example/Encoder.cs).  Note that the file `unencoded.raw` must be in the current working directory for the example to find it.
+
 
 Limitations
 -----------
