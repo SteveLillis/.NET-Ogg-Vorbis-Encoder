@@ -8,12 +8,12 @@ namespace OggVorbisEncoder
     {
         private LookupCollection(
             EnvelopeLookup envelopeLookup,
-            IReadOnlyList<MdctLookup> transformLookup,
+            MdctLookup[] transformLookup,
             PsyGlobalLookup psyGlobalLookup,
-            IReadOnlyList<PsyLookup> psyLookup,
-            IReadOnlyList<DrftLookup> fftLookup,
-            IReadOnlyList<FloorLookup> floorLookup,
-            IReadOnlyList<ResidueLookup> residueLookup)
+            PsyLookup[] psyLookup,
+            DrftLookup[] fftLookup,
+            FloorLookup[] floorLookup,
+            ResidueLookup[] residueLookup)
         {
             EnvelopeLookup = envelopeLookup;
             TransformLookup = transformLookup;
@@ -25,12 +25,12 @@ namespace OggVorbisEncoder
         }
 
         public EnvelopeLookup EnvelopeLookup { get; }
-        public IReadOnlyList<MdctLookup> TransformLookup { get; }
+        public MdctLookup[] TransformLookup { get; }
         public PsyGlobalLookup PsyGlobalLookup { get; }
-        public IReadOnlyList<PsyLookup> PsyLookup { get; }
-        public IReadOnlyList<DrftLookup> FftLookup { get; }
-        public IReadOnlyList<FloorLookup> FloorLookup { get; }
-        public IReadOnlyList<ResidueLookup> ResidueLookup { get; }
+        public PsyLookup[] PsyLookup { get; }
+        public DrftLookup[] FftLookup { get; }
+        public FloorLookup[] FloorLookup { get; }
+        public ResidueLookup[] ResidueLookup { get; }
 
         public static LookupCollection Create(VorbisInfo info)
         {

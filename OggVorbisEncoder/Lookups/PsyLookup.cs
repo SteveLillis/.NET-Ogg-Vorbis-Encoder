@@ -386,8 +386,8 @@ namespace OggVorbisEncoder.Lookups
         }
 
         public void OffsetAndMix(
-            IReadOnlyList<float> noise,
-            IReadOnlyList<float> tone,
+            float[] noise,
+            float[] tone,
             int offsetIndex,
             IList<float> logmask,
             IList<float> mdct,
@@ -645,8 +645,8 @@ namespace OggVorbisEncoder.Lookups
             int blobno,
             PsyGlobal psyGlobal,
             Mapping mapping,
-            IReadOnlyList<float[]> mdct,
-            IReadOnlyList<int[]> iwork,
+            float[][] mdct,
+            int[][] iwork,
             bool[] nonzero,
             int slidingLowpass,
             int channels)
@@ -1101,14 +1101,14 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private static void MinCurve(IList<float> c1, IReadOnlyList<float> c2)
+        private static void MinCurve(IList<float> c1, float[] c2)
         {
             for (var i = 0; i < EhmerMax; i++)
                 if (c2[i] < c1[i])
                     c1[i] = c2[i];
         }
 
-        private static void MaxCurve(IList<float> c1, IReadOnlyList<float> c2)
+        private static void MaxCurve(IList<float> c1, float[] c2)
         {
             for (var i = 0; i < EhmerMax; i++)
                 if (c2[i] > c1[i])
@@ -1140,13 +1140,13 @@ namespace OggVorbisEncoder.Lookups
 
         #region SOURCE DATA
 
-        private static readonly IReadOnlyList<float> StereoThresholdsLimit = new[]
+        private static readonly float[] StereoThresholdsLimit = new[]
             {0, .5f, 1, 1.5f, 2, 2.5f, 4.5f, 8.5f, 9e10f};
 
-        private static readonly IReadOnlyList<float> StereoThresholds = new[]
+        private static readonly float[] StereoThresholds = new[]
             {0, .5f, 1, 1.5f, 2.5f, 4.5f, 8.5f, 16.5f, 9e10f};
 
-        private static readonly IReadOnlyList<float> DecibelLookup = new[]
+        private static readonly float[] DecibelLookup = new[]
         {
             1.0649863e-07f, 1.1341951e-07f, 1.2079015e-07f, 1.2863978e-07f,
             1.3699951e-07f, 1.4590251e-07f, 1.5538408e-07f, 1.6548181e-07f,
