@@ -2076,7 +2076,7 @@ namespace OggVorbisEncoder
             1.0000000000F, 1.0000000000F, 1.0000000000F, 1.0000000000F
         };
 
-        public static readonly IReadOnlyList<IReadOnlyList<float>> Windows = new[]
+        public static readonly float[][] Windows = new[]
         {
             Win64,
             Win128,
