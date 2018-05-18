@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OggVorbisEncoder.Setup;
+using OggVorbisEncoder.Setup.Templates.Mono11;
 using OggVorbisEncoder.Setup.Templates.Stereo44;
 
 namespace OggVorbisEncoder
@@ -98,9 +99,9 @@ namespace OggVorbisEncoder
 
         private static IEnumerable<ISetupTemplate> CreateTemplates()
         {
-            return new[]
+            return new ISetupTemplate[]
             {
-                new Stereo44SetupDataTemplate()
+                new Stereo44SetupDataTemplate(),
                 //new 44_uncoupled(),
                 //new 32_stereo(),
                 //new 32_uncoupled(),
@@ -109,7 +110,7 @@ namespace OggVorbisEncoder
                 //new 16_stereo(),
                 //new 16_uncoupled(),
                 //new 11_stereo(),
-                //new 11_uncoupled(),
+                new Mono11SetupDataTemplate()
                 //new 8_stereo(),
                 //new 8_uncoupled(),
                 //new X_stereo(),

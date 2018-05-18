@@ -13,8 +13,8 @@ namespace OggVorbisEncoder.Lookups
 
         public ResidueLookup(Residue residue, CodeBook[] fullBooks)
         {
-            if (residue.ResidueType != ResidueType.Two)
-                throw new NotImplementedException("ResidueTypes other than 'Two' are not yet implemented");
+            // if (residue.ResidueType != ResidueType.Two)
+            //    throw new NotImplementedException("ResidueTypes other than 'Two' are not yet implemented");
 
             _residue = residue;
 
