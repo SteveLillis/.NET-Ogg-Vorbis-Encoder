@@ -3,20 +3,25 @@ using System.IO;
 
 namespace OggVorbisEncoder.Example
 {
-    public class Encoder
+    public class OggHelper
     {
         private const int SampleSize = 1024;
 
-        [STAThread]
-        private static void Main()
+        public static int Main(string[] args)
         {
-            var stdin = new FileStream(@"unencoded.raw", FileMode.Open, FileAccess.Read);
-            var stdout = new FileStream(@"encoded.ogg", FileMode.Create, FileAccess.Write);
+            Convert(@"c:\temp\sguy.wav", @"c:\temp\sguy.ogg");
+            return 0;
+        }
 
-            // StripWavHeader(stdin);
+        public static void Convert(string source, string target)
+        {
+            var stdin = new FileStream(source, FileMode.Open, FileAccess.Read);
+            var stdout = new FileStream(target, FileMode.Create, FileAccess.Write);
+
+            StripWavHeader(new BinaryReader(stdin));
 
             // Stores all the static vorbis bitstream settings
-            var info = VorbisInfo.InitVariableBitRate(2, 44100, 0.1f);
+            var info = VorbisInfo.InitVariableBitRate(1, 11025, 0.1f);
 
             // set up our packet->stream encoder
             var serial = new Random().Next();
@@ -57,9 +62,8 @@ namespace OggVorbisEncoder.Example
 
             var buffer = new float[info.Channels][];
             buffer[0] = new float[SampleSize];
-            buffer[1] = new float[SampleSize];
 
-            var readbuffer = new byte[SampleSize*4];
+            var readbuffer = new byte[SampleSize * 2];
             while (!oggStream.Finished)
             {
                 var bytes = stdin.Read(readbuffer, 0, readbuffer.Length);
@@ -70,13 +74,12 @@ namespace OggVorbisEncoder.Example
                 }
                 else
                 {
-                    var samples = bytes/4;
+                    var samples = bytes / 2;
 
                     for (var i = 0; i < samples; i++)
                     {
                         // uninterleave samples
-                        buffer[0][i] = (short) ((readbuffer[i*4 + 1] << 8) | (0x00ff & readbuffer[i*4]))/32768f;
-                        buffer[1][i] = (short) ((readbuffer[i*4 + 3] << 8) | (0x00ff & readbuffer[i*4 + 2]))/32768f;
+                        buffer[0][i] = (short)((readbuffer[i * 2 + 1] << 8) | (0x00ff & readbuffer[i * 2])) / 32768f;
                     }
 
                     processingState.WriteData(buffer, samples);
