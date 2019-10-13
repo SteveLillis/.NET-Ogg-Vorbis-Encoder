@@ -1,12 +1,36 @@
-﻿using System;
+﻿using OggVorbisEncoder.Setup;
+using OggVorbisEncoder.Setup.Templates;
+using System;
 using System.Collections.Generic;
-using OggVorbisEncoder.Setup;
-using OggVorbisEncoder.Setup.Templates.Stereo44;
 
 namespace OggVorbisEncoder
 {
     public class EncodeSetup
     {
+        private static IEnumerable<ISetupTemplate> CreateTemplates()
+        {
+            return new ISetupTemplate[]
+            {
+                new Stereo44SetupDataTemplate(),
+                new Uncoupled44SetupDataTemplate(),
+                new Stereo32SetupDataTemplate(),
+                new Uncoupled32SetupDataTemplate(),
+                new Stereo22SetupDataTemplate(),
+                new Uncoupled22SetupDataTemplate(),
+                new Stereo16SetupDataTemplate(),
+                new Uncoupled16SetupDataTemplate(),
+                new Stereo11SetupDataTemplate(),
+                new Uncoupled11SetupDataTemplate(),
+                new Stereo8SetupDataTemplate(),
+                new Uncoupled8SetupDataTemplate(),
+                new StereoXSetupDataTemplate(),
+                new UncoupledXSetupDataTemplate(),
+                new StereoXXSetupDataTemplate(),
+                new UncoupledXXSetupDataTemplate()
+            };
+        }
+
+
         private static readonly IEnumerable<ISetupTemplate> SetupTemplates = CreateTemplates();
 
         public EncodeSetup(ISetupTemplate template, double baseSetting)
@@ -94,29 +118,6 @@ namespace OggVorbisEncoder
             }
 
             throw new InvalidOperationException("No matching template found");
-        }
-
-        private static IEnumerable<ISetupTemplate> CreateTemplates()
-        {
-            return new[]
-            {
-                new Stereo44SetupDataTemplate()
-                //new 44_uncoupled(),
-                //new 32_stereo(),
-                //new 32_uncoupled(),
-                //new 22_stereo(),
-                //new 22_uncoupled(),
-                //new 16_stereo(),
-                //new 16_uncoupled(),
-                //new 11_stereo(),
-                //new 11_uncoupled(),
-                //new 8_stereo(),
-                //new 8_uncoupled(),
-                //new X_stereo(),
-                //new X_uncoupled(),
-                //new XX_stereo(),
-                //new XX_uncoupled()
-            };
         }
     }
 }
