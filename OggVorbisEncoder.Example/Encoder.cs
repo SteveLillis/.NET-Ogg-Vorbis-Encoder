@@ -29,15 +29,15 @@ namespace OggVorbisEncoder.Example
             {
                 foreach (var sampleRate in SampleRates)
                 {
-                    //try
+                    try
                     {
                         var sineBytes = GenerateSineWaveFile(sampleRate, Channels, Frequency, 10.0f);
                         File.WriteAllBytes($"C:/Temp/Sine_{sampleRate}_{Frequency}hz_{Channels}.ogg", sineBytes);
                         Console.WriteLine($"{sampleRate} samples/s, {Channels} channels succeeded.");
                     }
-                    //catch (Exception ex)
+                    catch (Exception ex)
                     {
-                        //Console.WriteLine($"{sampleRate} samples/s, {Channels} channels failed. {ex.Message}");
+                        Console.WriteLine($"{sampleRate} samples/s, {Channels} channels failed. {ex.Message}");
                     }
                 }
             }
