@@ -8,6 +8,11 @@
             -120
         };
 
+        internal static readonly int[] AthAbs =
+        {
+            -130, -130, -130, -130, -140, -140, -140, -140, -140, -140, -140, -150
+        };
+
         public static readonly double[] CompandShortMapping = {0.5, 1, 1, 1.3, 1.6, 2, 2, 2, 2, 2, 2, 2};
         public static readonly double[] CompandLongMapping = {3.5, 4, 4, 4.3, 4.6, 5, 5, 5, 5, 5, 5, 5};
 
@@ -15,7 +20,7 @@
         public static readonly int[] ToneZeroDecibel = {90, 90, 95, 95, 95, 95, 105, 105, 105, 105, 105, 105};
         public static readonly int[] NoiseSuppress = {-20, -20, -24, -24, -24, -24, -30, -40, -40, -45, -45, -45};
 
-        public static readonly Noise3[] NoiseBiasImpulseValues =
+        public static readonly Noise3[] NoiseBiasImpulse =
         {
             /*  63     125     250     500      1k      2k      4k      8k     16k*/
             // -1 
@@ -104,7 +109,7 @@
             })
         };
 
-        public static readonly Noise3[] NoiseBiasPaddingValues =
+        public static readonly Noise3[] NoiseBiasPadding =
         {
             /*  63     125     250     500      1k       2k      4k      8k     16k*/
             // -1 

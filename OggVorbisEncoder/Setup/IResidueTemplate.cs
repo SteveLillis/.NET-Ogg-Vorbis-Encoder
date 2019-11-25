@@ -5,7 +5,7 @@
         ResidueType ResidueType { get; }
         ResidueLimitType LimitType { get; }
         int Grouping { get; }
-        Residue Residue { get; }
+        ResidueEntry Residue { get; }
         IStaticCodeBook BookAux { get; }
         IStaticCodeBook BookAuxManaged { get; }
         IStaticBookBlock BooksBase { get; }

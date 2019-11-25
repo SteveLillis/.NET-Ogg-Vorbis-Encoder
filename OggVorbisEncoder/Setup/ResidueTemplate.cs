@@ -6,7 +6,7 @@
             ResidueType residueType,
             ResidueLimitType limitType,
             int grouping,
-            Residue residue,
+            ResidueEntry residue,
             IStaticCodeBook bookAux,
             IStaticCodeBook booxAuxManaged,
             IStaticBookBlock booksBase,
@@ -25,7 +25,7 @@
         public ResidueType ResidueType { get; }
         public ResidueLimitType LimitType { get; }
         public int Grouping { get; }
-        public Residue Residue { get; }
+        public ResidueEntry Residue { get; }
         public IStaticCodeBook BookAux { get; }
         public IStaticCodeBook BookAuxManaged { get; }
         public IStaticBookBlock BooksBase { get; }

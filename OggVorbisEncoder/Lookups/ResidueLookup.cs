@@ -8,14 +8,11 @@ namespace OggVorbisEncoder.Lookups
     {
         private readonly CodeBook[][] _partitionBooks;
         private readonly CodeBook _phraseBook;
-        private readonly Residue _residue;
+        private readonly ResidueEntry _residue;
         private readonly int _stages;
 
-        public ResidueLookup(Residue residue, CodeBook[] fullBooks)
+        public ResidueLookup(ResidueEntry residue, CodeBook[] fullBooks)
         {
-            if (residue.ResidueType != ResidueType.Two)
-                throw new NotImplementedException("ResidueTypes other than 'Two' are not yet implemented");
-
             _residue = residue;
 
             _phraseBook = fullBooks[residue.GroupBook];
@@ -52,19 +49,43 @@ namespace OggVorbisEncoder.Lookups
             int channels,
             int[][] partword)
         {
-            return Res2Forward(buffer, pcmend, couples, nonzero, channels, partword);
+            switch (_residue.ResidueType)
+            {
+                case ResidueType.One:
+                    return Res1Forward(buffer, pcmend, couples, nonzero, channels, partword);
+                case ResidueType.Two:
+                    return Res2Forward(buffer, pcmend, couples, nonzero, channels, partword);
+                default: throw new NotImplementedException();
+            }
+
+        }
+
+        private int Res1Forward(EncodeBuffer buffer, int pcmend, int[][] couples, bool[] nonzero, int channels,
+            int[][] partword)
+        {
+            var used = 0;
+            
+            for (var i = 0; i < channels; i++)
+            {
+                if (nonzero[i])
+                    couples[used++] = couples[i];
+            }
+
+            return (used > 0)
+                ? InnerForward(buffer, couples, used, partword)
+                : 0;
         }
 
         private int Res2Forward(EncodeBuffer buffer, int pcmend, int[][] couples, bool[] nonzero, int channels,
             int[][] partword)
         {
-            var n = pcmend/2;
+            var n = pcmend / 2;
 
             var used = false;
 
             // don't duplicate the code; use a working vector hack for now and
             // reshape ourselves into a single channel res1
-            var work = new int[channels*n];
+            var work = new int[channels * n];
             for (var i = 0; i < channels; i++)
             {
                 var pcm = couples[i];
@@ -75,11 +96,11 @@ namespace OggVorbisEncoder.Lookups
             }
 
             return used
-                ? Res1Forward(buffer, work, 1, partword)
+                ? InnerForward(buffer, new[] { work }, 1, partword)
                 : 0;
         }
 
-        private int Res1Forward(EncodeBuffer buffer, int[] work, int channels, int[][] partword)
+        private int InnerForward(EncodeBuffer buffer, int[][] work, int channels, int[][] partword)
         {
             var n = _residue.End - _residue.Begin;
             var partitionValues = n/_residue.Grouping;
@@ -117,7 +138,7 @@ namespace OggVorbisEncoder.Lookups
                             {
                                 var statebook = _partitionBooks[partword[j][i]][s];
                                 if (statebook != null)
-                                    EncodePart(buffer, work, j + offset, _residue.Grouping, statebook);
+                                    EncodePart(buffer, work[j], offset, _residue.Grouping, statebook);
                             }
                     }
                 }
@@ -211,10 +232,57 @@ namespace OggVorbisEncoder.Lookups
         public int[][] Class(int[][] couples, IList<bool> nonzero, int channels)
         {
             for (var channel = 0; channel < channels; channel++)
+            {
                 if (nonzero[channel])
-                    return ResTwoClass(couples, channels);
-
+                {
+                    switch (_residue.ResidueType)
+                    {
+                        case ResidueType.One:
+                            return ResOneClass(couples, channels);
+                        case ResidueType.Two:
+                            return ResTwoClass(couples, channels);
+                    }
+                }
+            }
             return null;
+        }
+
+        private int[][] ResOneClass(int[][] couples, int channels)
+        {
+            var n = _residue.End - _residue.Begin;
+
+            var valueCount = n / _residue.Grouping;
+
+            var partword = new int[channels][];
+            for(int c = 0;c<channels;c++)
+                partword[c] = new int[valueCount];
+
+            int j = 0, k = 0;
+
+            for (int i = 0; i < valueCount; i++)
+            {
+                int offset = i * _residue.Grouping + _residue.Begin;
+                for (j = 0; j < channels; j++)
+                {
+                    int max = 0;
+                    int ent = 0;
+                    for (k = 0; k < _residue.Grouping; k++)
+                    {
+                        if (Math.Abs(couples[j][offset + k]) > max) max = Math.Abs(couples[j][offset + k]);
+                        ent += Math.Abs(couples[j][offset + k]);
+                    }
+                    ent = (int)(ent * (100.0f / _residue.Grouping));
+
+                    for (k = 0; k < _residue.Partitions - 1; k++)
+                        if (max <= _residue.ClassMetric1[k] &&
+                           (_residue.ClassMetric2[k] < 0 || ent < _residue.ClassMetric2[k]))
+                            break;
+
+                    partword[j][i] = k;
+                }
+            }
+
+            return partword;
         }
 
         private int[][] ResTwoClass(int[][] couples, int channels)

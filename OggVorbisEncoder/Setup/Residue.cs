@@ -1,8 +1,8 @@
 ﻿namespace OggVorbisEncoder.Setup
 {
-    public class Residue
+    public class ResidueEntry
     {
-        public Residue(
+        public ResidueEntry(
             int begin,
             int end,
             int grouping,
@@ -41,8 +41,8 @@
         public ResidueType ResidueType { get; }
         public int Grouping { get; }
 
-        public Residue Clone(ResidueType residueTypeOverride, int groupingOverride)
-            => new Residue(
+        public ResidueEntry Clone(ResidueType residueTypeOverride, int groupingOverride)
+            => new ResidueEntry(
                 Begin,
                 End,
                 groupingOverride,

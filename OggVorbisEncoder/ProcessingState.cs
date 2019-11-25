@@ -54,7 +54,7 @@ namespace OggVorbisEncoder
         /// </summary>
         /// <param name="data">The data to write in an array of dimensions: channels * length</param>
         /// <param name="length">The number of elements to write</param>
-        public void WriteData(float[][] data, int length)
+        public void WriteData(float[][] data, int length, int read_offset = 0)
         {
             if (length <= 0)
                 return;
@@ -62,7 +62,7 @@ namespace OggVorbisEncoder
             EnsureBufferSize(length);
 
             for (var i = 0; i < data.Length; ++i)
-                Array.Copy(data[i], 0, _pcm[i], _pcmCurrent, length);
+                Array.Copy(data[i], read_offset, _pcm[i], _pcmCurrent, length);
 
             var vi = _vorbisInfo;
             var ci = vi.CodecSetup;
@@ -559,7 +559,7 @@ namespace OggVorbisEncoder
                 for (var j = 0; j < channels; j++)
                     if (mapping.ChannelMuxList[j] == i)
                         coupleBundle[channelsInBundle++] = work[j];
-
+                
                 residue.Forward(
                     buffer,
                     pcmEnd,

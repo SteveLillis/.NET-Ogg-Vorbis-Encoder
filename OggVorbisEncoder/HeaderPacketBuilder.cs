@@ -89,7 +89,7 @@ namespace OggVorbisEncoder
             buffer.Write((uint) codecSetup.ModeParams[i].Mapping, 8);
         }
 
-        private static void PackResidue(EncodeBuffer buffer, Residue residue)
+        private static void PackResidue(EncodeBuffer buffer, ResidueEntry residue)
         {
             buffer.Write((uint) residue.Begin, 24);
             buffer.Write((uint) residue.End, 24);

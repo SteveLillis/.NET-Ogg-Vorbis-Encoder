@@ -76,14 +76,16 @@ namespace OggVorbisEncoder
                 (int) encodeSetup.BaseSetting,
                 template.PsyNoiseNormalStart[0],
                 template.PsyNoiseNormalPartition[0],
-                template.PsyNoiseNormalThreshold);
+                template.PsyNoiseNormalThreshold,
+                0);
 
             PsyParamSetup(
                 codecSetup,
                 (int) encodeSetup.BaseSetting,
                 template.PsyNoiseNormalStart[0],
                 template.PsyNoiseNormalPartition[0],
-                template.PsyNoiseNormalThreshold);
+                template.PsyNoiseNormalThreshold,
+                1);
 
             if (!singleBlock)
             {
@@ -92,14 +94,16 @@ namespace OggVorbisEncoder
                     (int) encodeSetup.BaseSetting,
                     template.PsyNoiseNormalStart[1],
                     template.PsyNoiseNormalPartition[1],
-                    template.PsyNoiseNormalThreshold);
+                    template.PsyNoiseNormalThreshold,
+                    2);
 
                 PsyParamSetup(
                     codecSetup,
                     (int) encodeSetup.BaseSetting,
                     template.PsyNoiseNormalStart[1],
                     template.PsyNoiseNormalPartition[1],
-                    template.PsyNoiseNormalThreshold);
+                    template.PsyNoiseNormalThreshold,
+                    3);
             }
 
             // tone masking setup 
@@ -263,10 +267,9 @@ namespace OggVorbisEncoder
             int encodeSetupBaseSetting,
             int[] noiseNormalStart,
             int[] noiseNormalPartition,
-            double[] noiseNormalThreshold)
+            double[] noiseNormalThreshold,
+            int block)
         {
-            var block = codecSetup.PsyParams.Count;
-
             var psyParam = Psy.PsyInfoTemplate.Clone();
             codecSetup.PsyParams.Add(psyParam);
             psyParam.BlockFlag = block >> 1;
@@ -442,7 +445,7 @@ namespace OggVorbisEncoder
 
         private static void FillBooks(
             CodecSetup codecSetup,
-            Residue r,
+            ResidueEntry r,
             IStaticCodeBook bookAux,
             IStaticBookBlock bookBlock)
         {
@@ -610,7 +613,7 @@ namespace OggVorbisEncoder
             psyParam.MaxCurveDecibel = (float) (templatePsyTone0Decibel[setting]*(1 - ds)
                                                 + templatePsyTone0Decibel[setting + 1]*ds);
 
-            for (var i = 0; i < psyParam.ToneAtt.Length; i++)
+            for (var i = 0; i < PsyInfo.Bands; i++)
                 psyParam.ToneAtt[i] = (float) (templatePsyToneAdjLong[setting].Block[i]*(1 - ds)
                                                + templatePsyToneAdjLong[setting + 1].Block[i]*ds);
         }

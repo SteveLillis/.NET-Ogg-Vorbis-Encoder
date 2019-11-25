@@ -11,6 +11,26 @@ The code makes heavy use of C# 6 features, so you'll need Visual Studio 2015 or 
 For a demonstration of how to implement the encoder library, see [the included example](OggVorbisEncoder.Example/Encoder.cs).  Note that the file `unencoded.raw` must be in the current working directory for the example to find it.
 
 
-Limitations
+Encodings
 -----------
- - Currently only supports **40k+ Stereo VBR** encoding.  If you need another format you just need to add the required setup data, feel free to raise a Pull Request, or contact me if you need more information.
+Currently supports the following encodings:
+
+| Sample Rate |    Range    | Channels | Supported | 
+|-------------|-------------|----------|-----------|
+|    44100    |  (40k-50k)  |     1    |  [x] Yes
+|    44100    |  (40k-50k)  |     2    |  [x] Yes
+|    44100    |  (40k-50k)  |    5.1   |  [-] Non-Optimal
+|    32000    |  (26k-40k)  |     1    |  [x] Yes
+|    32000    |  (26k-40k)  |     2    |  [x] Yes
+|    22050    |  (19k-26k)  |     1    |  [x] Yes
+|    22050    |  (19k-26k)  |     2    |  [x] Yes
+|    16000    |  (15k-19k)  |     1    |  [x] Yes
+|    16000    |  (15k-19k)  |     2    |  [x] Yes
+|    11025    |   (9k-15k)  |     1    |  [x] Yes
+|    11025    |   (9k-15k)  |     2    |  [x] Yes
+|     8000    |   (8k-9k)   |     1    |  [x] Yes
+|     8000    |   (8k-9k)   |     2    |  [x] Yes
+|        X    |  (50k-200k) |     1    |  [x] Yes
+|        X    |  (50k-200k) |     2    |  [x] Yes
+|       XX    |   (0k-8k)   |     1    |  [x] Yes
+|       XX    |   (0k-8k)   |     2    |  [x] Yes
