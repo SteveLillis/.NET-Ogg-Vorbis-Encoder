@@ -673,8 +673,9 @@ namespace OggVorbisEncoder
             PsyLookup psyLookup,
             float[] localAmpMax)
         {
-            var noise = new float[pcmEnd/2];
-            var tone = new float[pcmEnd/2];
+            var pcmEndOver2 = pcmEnd/2;
+            var noise = new float[pcmEndOver2];
+            var tone = new float[pcmEndOver2];
 
             for (var channel = 0; channel < inputPcm.Length; channel++)
             {
@@ -683,11 +684,11 @@ namespace OggVorbisEncoder
                 var submap = mapping.ChannelMuxList[channel];
 
                 var pcm = inputPcm[channel];
-                var logmdct = new OffsetArray<float>(pcm, pcmEnd/2);
+                var logmdct = new Span<float>(pcm, pcmEndOver2, pcm.Length-pcmEndOver2);
 
                 floorPosts[channel] = new int[PsyGlobal.PacketBlobs][];
 
-                for (var j = 0; j < pcmEnd/2; j++)
+                for (var j = 0; j < pcmEndOver2; j++)
                     logmdct[j] = gmdct[channel][j].ToDecibel() + DecibelOffset;
 
                 // first step; noise masking.  Not only does 'noise masking'

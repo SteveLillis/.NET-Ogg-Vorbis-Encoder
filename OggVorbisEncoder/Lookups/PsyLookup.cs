@@ -391,7 +391,7 @@ namespace OggVorbisEncoder.Lookups
             int offsetIndex,
             float[] logmask,
             float[] mdct,
-            OffsetArray<float> logmdct)
+            in Span<float> logmdct)
         {
             var toneAtt = _psyInfo.ToneMasterAtt[offsetIndex];
 
@@ -449,10 +449,9 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        public void NoiseMask(OffsetArray<float> logmdct, float[] logmask)
+        public void NoiseMask(in Span<float> logmdct, float[] logmask)
         {
-            var w = new float[_n];
-            var work = new OffsetArray<float>(w, 0);
+            var work = new Span<float>(new float[_n]);
 
             BarkNoiseHybridMp(logmdct, logmask, 140, -1);
 
@@ -479,7 +478,7 @@ namespace OggVorbisEncoder.Lookups
         }
 
         private void BarkNoiseHybridMp(
-            OffsetArray<float> f,
+            in Span<float> f,
             float[] noise,
             float offset,
             int adjusted)
