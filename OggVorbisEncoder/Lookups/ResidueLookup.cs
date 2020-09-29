@@ -229,7 +229,7 @@ namespace OggVorbisEncoder.Lookups
             return index;
         }
 
-        public int[][] Class(int[][] couples, IList<bool> nonzero, int channels)
+        public int[][] Class(int[][] couples, bool[] nonzero, int channels)
         {
             for (var channel = 0; channel < channels; channel++)
             {

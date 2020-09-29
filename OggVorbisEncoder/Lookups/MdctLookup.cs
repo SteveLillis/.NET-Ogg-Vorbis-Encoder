@@ -55,7 +55,7 @@ namespace OggVorbisEncoder.Lookups
             _scale = 4f/n;
         }
 
-        public void Forward(IList<float> input, float[] output)
+        public void Forward(float[] input, float[] output)
         {
             var n = _n;
             var n2 = n >> 1;
@@ -129,7 +129,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private void Butterflies(IList<float> data, int points)
+        private void Butterflies(OffsetArray<float> data, int points)
         {
             var stages = _log2N - 5;
 
@@ -144,7 +144,7 @@ namespace OggVorbisEncoder.Lookups
                 Butterfly32(data, j);
         }
 
-        private static void Butterfly32(IList<float> data, int offset)
+        private static void Butterfly32(OffsetArray<float> data, int offset)
         {
             var r0 = data[offset + 30] - data[offset + 14];
             var r1 = data[offset + 31] - data[offset + 15];
@@ -207,7 +207,7 @@ namespace OggVorbisEncoder.Lookups
             Butterfly16(data, offset + 16);
         }
 
-        private static void Butterfly16(IList<float> data, int offset)
+        private static void Butterfly16(OffsetArray<float> data, int offset)
         {
             var r0 = data[offset + 1] - data[offset + 9];
             var r1 = data[offset + 0] - data[offset + 8];
@@ -242,7 +242,7 @@ namespace OggVorbisEncoder.Lookups
             Butterfly8(data, offset + 8);
         }
 
-        private static void Butterfly8(IList<float> data, int offset)
+        private static void Butterfly8(OffsetArray<float> data, int offset)
         {
             var r0 = data[offset + 6] + data[offset + 2];
             var r1 = data[offset + 6] - data[offset + 2];
@@ -265,7 +265,7 @@ namespace OggVorbisEncoder.Lookups
             data[offset + 5] = r1 - r0;
         }
 
-        private void ButterflyGeneric(IList<float> data, int offset, int points, int trigIncrement)
+        private void ButterflyGeneric(OffsetArray<float> data, int offset, int points, int trigIncrement)
         {
             var t = 0;
             var x1 = offset + points - 8;
@@ -313,7 +313,7 @@ namespace OggVorbisEncoder.Lookups
             } while (x2 >= offset);
         }
 
-        private void ButterflyFirst(IList<float> data, int points)
+        private void ButterflyFirst(OffsetArray<float> data, int points)
         {
             var x1 = points - 8;
             var x2 = (points >> 1) - 8;
@@ -355,7 +355,7 @@ namespace OggVorbisEncoder.Lookups
             } while (x2 >= 0);
         }
 
-        private void ReverseBits(IList<float> data)
+        private void ReverseBits(float[] data)
         {
             var n = _n;
             var bit = 0;

@@ -5,8 +5,8 @@ namespace OggVorbisEncoder.Lookups
 {
     public class DrftLookup
     {
-        private readonly IList<int> _splitCache;
-        private readonly IList<float> _trigCache;
+        private readonly int[] _splitCache;
+        private readonly float[] _trigCache;
 
         public DrftLookup(int n)
         {
@@ -107,7 +107,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        public void Forward(IList<float> data)
+        public void Forward(float[] data)
         {
             if (N == 1)
                 return;
@@ -174,7 +174,7 @@ namespace OggVorbisEncoder.Lookups
                 data[i] = _trigCache[i];
         }
 
-        private void dradf4(int ido, int l1, IList<float> cc, IList<float> ch, int wa1, int wa2, int wa3)
+        private void dradf4(int ido, int l1, float[] cc, float[] ch, int wa1, int wa2, int wa3)
         {
             const float hsqt2 = .70710678118654752f;
             int k, t5, t6;
@@ -282,7 +282,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private void dradf2(int ido, int l1, IList<float> cc, IList<float> ch, int wa1)
+        private void dradf2(int ido, int l1, float[] cc, float[] ch, int wa1)
         {
             var t1 = 0;
             var t2 = l1*ido;
@@ -342,8 +342,8 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private void dradfg(int ido, int ip, int l1, int idl1, IList<float> cc, IList<float> c1, IList<float> c2,
-            IList<float> ch, IList<float> ch2, int wa)
+        private void dradfg(int ido, int ip, int l1, int idl1, float[] cc, float[] c1, float[] c2,
+            float[] ch, float[] ch2, int wa)
         {
             const float tpi = 6.283185307179586f;
 

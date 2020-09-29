@@ -6,9 +6,9 @@ namespace OggVorbisEncoder
 {
     public class OffsetArray<T> : IList<T>
     {
-        private readonly IList<T> _array;
+        private readonly T[] _array;
 
-        public OffsetArray(IList<T> array, int offset)
+        public OffsetArray(T[] array, int offset)
         {
             _array = array;
             Offset = offset;
@@ -22,7 +22,7 @@ namespace OggVorbisEncoder
             set { _array[Offset + index] = value; }
         }
 
-        public int Count => _array.Count - Offset;
+        public int Count => _array.Length - Offset;
 
         public bool IsReadOnly { get; } = false;
 

@@ -101,7 +101,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        public int[] Fit(IList<float> logmdct, IList<float> logmask)
+        public int[] Fit(OffsetArray<float> logmdct, float[] logmask)
         {
             var n = _n;
 
@@ -268,7 +268,7 @@ namespace OggVorbisEncoder.Lookups
             return null;
         }
 
-        private bool InspectError(int x0, int x1, int y0, int y1, IList<float> mask, IList<float> mdct)
+        private bool InspectError(int x0, int x1, int y0, int y1, float[] mask, OffsetArray<float> mdct)
         {
             var dy = y1 - y0;
             var adx = x1 - x0;
@@ -335,7 +335,7 @@ namespace OggVorbisEncoder.Lookups
             return false;
         }
 
-        private int FitLine(IList<FitAccumulation> acc, int offset, int fits, out int y0, out int y1)
+        private int FitLine(FitAccumulation[] acc, int offset, int fits, out int y0, out int y1)
         {
             y0 = -200;
             y1 = -200;
@@ -427,7 +427,7 @@ namespace OggVorbisEncoder.Lookups
             return (a[pos] + b[pos]) >> 1;
         }
 
-        private int AccumulateFit(IList<float> flr, IList<float> mdct, int x0, int x1, ref FitAccumulation fits, int n)
+        private int AccumulateFit(float[] flr, OffsetArray<float> mdct, int x0, int x1, ref FitAccumulation fits, int n)
         {
             int xa = 0, ya = 0, x2a = 0, xya = 0, na = 0, xb = 0, yb = 0, x2b = 0, xyb = 0, nb = 0;
 
@@ -490,7 +490,7 @@ namespace OggVorbisEncoder.Lookups
         public bool Encode(
             EncodeBuffer buffer,
             IList<IStaticCodeBook> staticBooks,
-            IList<CodeBook> books,
+            CodeBook[] books,
             int[] post,
             int[] ilogmask,
             int pcmEnd,
