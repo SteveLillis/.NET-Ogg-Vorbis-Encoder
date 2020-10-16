@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using OggVorbisEncoder.Setup;
 
@@ -174,7 +173,7 @@ namespace OggVorbisEncoder.Lookups
             // we want to have a 'minimum bar' for energy, else we're just
             // basing blocks on quantization noise that outweighs the signal
             // itself (for low power signals) 
-            var vec = new float[WindowLength];
+            Span<float> vec = stackalloc float[WindowLength];
 
             // stretch is used to gradually lengthen the number of windows considered previous-to-potential-trigger 
             var penalty = _psyGlobal.StretchPenalty - (_stretch/2 - EnvelopeMinStretch);

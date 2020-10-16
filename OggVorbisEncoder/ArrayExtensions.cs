@@ -17,12 +17,10 @@ namespace OggVorbisEncoder
                 throw new IndexOutOfRangeException(
                     $"{nameof(input)} of size [{input.Length}] is greater than {nameof(fixedLength)} of [{fixedLength}]");
 
-            var missingCount = fixedLength - input.Length;
-            var blankElements = Enumerable.Range(0, missingCount).Select(s => default(TElement));
+            var output = new TElement[fixedLength];
+            Array.Copy(input, output, input.Length);
 
-            return input
-                .Concat(blankElements)
-                .ToArray();
+            return output;
         }
     }
 }

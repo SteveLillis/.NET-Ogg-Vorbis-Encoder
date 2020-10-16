@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using OggVorbisEncoder.Setup;
@@ -17,6 +18,7 @@ namespace OggVorbisEncoder.Lookups
         private readonly int[] _octave;
         private readonly PsyInfo _psyInfo;
         private readonly int _shiftOctave;
+        private readonly List<OffsetMemory<float>> _sort;
 
         private readonly float[][][] _toneCurves;
         private readonly int _totalOctaveLines;
@@ -28,6 +30,7 @@ namespace OggVorbisEncoder.Lookups
             _ath = new float[n];
             _octave = new int[n];
             _bark = new int[n];
+            _sort = new List<OffsetMemory<float>>(32);
 
             int lo = -99, hi = 1;
 
@@ -367,7 +370,13 @@ namespace OggVorbisEncoder.Lookups
             float globalSpecMax,
             float localSpecMax)
         {
-            var seed = new float[_totalOctaveLines];
+            float[] seedArr = null;
+            Span<float> seed = _totalOctaveLines <= 128
+                ? stackalloc float[_totalOctaveLines]
+                : (seedArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines));
+
+            seed = seed.Slice(0, _totalOctaveLines);
+
             var att = localSpecMax + _psyInfo.AthAdjAtt;
 
             for (var i = 0; i < seed.Length; i++)
@@ -383,6 +392,9 @@ namespace OggVorbisEncoder.Lookups
             // tone masking 
             SeedLoop(_toneCurves, pcm, logmask, seed, globalSpecMax);
             MaxSeeds(seed, logmask);
+
+            if (seedArr != null)
+                ArrayPool<float>.Shared.Return(seedArr);
         }
 
         public void OffsetAndMix(
@@ -451,7 +463,8 @@ namespace OggVorbisEncoder.Lookups
 
         public void NoiseMask(in Span<float> logmdct, float[] logmask)
         {
-            var work = new Span<float>(new float[_n]);
+            var workArr = ArrayPool<float>.Shared.Rent(_n);
+            Span<float> work = new Span<float>(workArr, 0, _n);
 
             BarkNoiseHybridMp(logmdct, logmask, 140, -1);
 
@@ -475,6 +488,8 @@ namespace OggVorbisEncoder.Lookups
 
                 logmask[i] = work[i] + _psyInfo.NoiseCompand[dB];
             }
+
+            ArrayPool<float>.Shared.Return(workArr);
         }
 
         private void BarkNoiseHybridMp(
@@ -483,11 +498,14 @@ namespace OggVorbisEncoder.Lookups
             float offset,
             int adjusted)
         {
-            var fp = new float[_n];
-            var fx = new float[_n];
-            var fxx = new float[_n];
-            var fy = new float[_n];
-            var fxy = new float[_n];
+            var arr = ArrayPool<float>.Shared.Rent(_n*5);
+            Span<float> arrSpan = arr;
+
+            var fp = arrSpan.Slice(0, _n);
+            var fx = arrSpan.Slice(_n, _n);
+            var fxx = arrSpan.Slice(_n*2, _n);
+            var fy = arrSpan.Slice(_n*3, _n);
+            var fxy = arrSpan.Slice(_n*4, _n);
 
             int i;
 
@@ -639,6 +657,8 @@ namespace OggVorbisEncoder.Lookups
                 r = (a + x*b)/d;
                 if (r - offset < noise[i]) noise[i] = r - offset;
             }
+
+            ArrayPool<float>.Shared.Return(arr);
         }
 
         public void CoupleQuantizeNormalize(
@@ -657,10 +677,10 @@ namespace OggVorbisEncoder.Lookups
             var postpoint = StereoThresholds[psyGlobal.CouplingPostPointAmp[blobno]];
 
             // non-zero flag working vector 
-            var nz = new bool[channels];
+            Span<bool> nz = stackalloc bool[channels];
 
             // energy surplus/deficit tracking 
-            var acc = new float[channels + mapping.CouplingSteps];
+            Span<float> acc = stackalloc float[channels + mapping.CouplingSteps];
 
             // The threshold of a stereo is changed with the size of n 
             if (_n > 1000)
@@ -669,17 +689,21 @@ namespace OggVorbisEncoder.Lookups
             // mdct is our raw mdct output, floor not removed. 
             // inout passes in the ifloor, passes back quantized result 
 
+            var arr = ArrayPool<float>.Shared.Rent(channels*partition*3);
+
             // unquantized energy (negative indicates amplitude has negative sign) 
-            var raw = new float[channels*partition];
+            var raw = arr.AsSpan(0, channels*partition);
 
             // dual pupose; quantized energy (if flag set), othersize fabs(raw) 
-            var quant = new float[channels*partition];
+            var quantMemory = arr.AsMemory(channels*partition, channels*partition);
+            var quant = quantMemory.Span;
 
             // floor energy 
-            var floor = new float[channels*partition];
+            var floor = arr.AsSpan(channels*partition*2, channels*partition);
 
             // flags indicating raw/quantized status of elements in raw vector 
-            var flag = new bool[channels*partition];
+            var flagArr = ArrayPool<bool>.Shared.Rent(channels*partition);
+            Span<bool> flag = flagArr.AsSpan(0, channels*partition);
 
             for (var i = 0; i < channels + mapping.CouplingSteps; i++)
                 acc[i] = 0f;
@@ -715,7 +739,7 @@ namespace OggVorbisEncoder.Lookups
                         acc[track] = NoiseNormalize(
                             limit,
                             raw,
-                            quant,
+                            quantMemory,
                             floor,
                             null,
                             channel*partition,
@@ -821,7 +845,7 @@ namespace OggVorbisEncoder.Lookups
                         acc[track] = NoiseNormalize(
                             limit,
                             raw,
-                            quant,
+                            quantMemory,
                             floor,
                             flag,
                             mag,
@@ -833,20 +857,25 @@ namespace OggVorbisEncoder.Lookups
                     }
                 }
             }
+
+            ArrayPool<float>.Shared.Return(arr);
+            ArrayPool<bool>.Shared.Return(flagArr);
         }
 
         private float NoiseNormalize(
             int limit,
-            float[] r,
-            float[] q,
-            float[] f,
-            bool[] flags,
+            in Span<float> r,
+            in Memory<float> qMemory,
+            in Span<float> f,
+            in Span<bool> flags,
             int offset,
             int i,
             int n,
             int[] output)
         {
-            var sort = new List<OffsetArray<float>>(n);
+            _sort.Clear();
+
+            var q = qMemory.Span;
 
             int j;
             var start = _psyInfo.Normalize ? _psyInfo.NormalStart - i : n;
@@ -890,7 +919,7 @@ namespace OggVorbisEncoder.Lookups
                     if ((ve < .25f) && ((flags == null) || (j >= limit - i)))
                     {
                         acc += ve;
-                        sort.Add(new OffsetArray<float>(q, j)); // q is fabs(r) for unflagged element
+                        _sort.Add(new OffsetMemory<float>(qMemory, j)); // q is fabs(r) for unflagged element
                     }
                     else
                     {
@@ -904,14 +933,14 @@ namespace OggVorbisEncoder.Lookups
                     }
                 }
 
-            if (sort.Count > 0)
+            if (_sort.Count > 0)
             {
-                sort.Sort(Comparer);
+                _sort.Sort(Comparer);
 
                 // noise norm to do 
-                for (j = 0; j < sort.Count; j++)
+                for (j = 0; j < _sort.Count; j++)
                 {
-                    var k = sort[j].Offset;
+                    var k = _sort[j].Offset;
                     if (acc >= _psyInfo.NormalThreshold)
                     {
                         output[i + k] = (int) UnitNorm(r[offset + k]);
@@ -931,7 +960,7 @@ namespace OggVorbisEncoder.Lookups
 
         private static void FlagLossless(
             int limit, float prePoint, float postPoint, float[] mdct,
-            float[] floor, bool[] flag, int offset, int i, int jn)
+            in Span<float> floor, in Span<bool> flag, int offset, int i, int jn)
         {
             for (var j = 0; j < jn; j++)
             {
@@ -948,7 +977,7 @@ namespace OggVorbisEncoder.Lookups
             return BitConverter.ToSingle(BitConverter.GetBytes(i), 0);
         }
 
-        private void MaxSeeds(float[] seed, float[] floor)
+        private void MaxSeeds(in Span<float> seed, float[] floor)
         {
             var linePosition = 0;
 
@@ -984,10 +1013,14 @@ namespace OggVorbisEncoder.Lookups
                     floor[linePosition] = minV;
         }
 
-        private void SeedChase(float[] seeds)
+        private void SeedChase(in Span<float> seeds)
         {
-            var posStack = new int[_totalOctaveLines];
-            var ampStack = new float[_totalOctaveLines];
+            var posStackArr = ArrayPool<int>.Shared.Rent(_totalOctaveLines);
+            var posStack = new Span<int>(posStackArr, 0, _totalOctaveLines);
+
+            var ampStackArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines);
+            var ampStack = new Span<float>(ampStackArr, 0, _totalOctaveLines);
+
             var stack = 0;
             var pos = 0;
 
@@ -1035,9 +1068,12 @@ namespace OggVorbisEncoder.Lookups
                 for (; pos < endPosition; pos++)
                     seeds[pos] = ampStack[i];
             }
+
+            ArrayPool<int>.Shared.Return(posStackArr);
+            ArrayPool<float>.Shared.Return(ampStackArr);
         }
 
-        private void SeedLoop(float[][][] curves, float[] pcm, float[] floor, float[] seeds, float specmax)
+        private void SeedLoop(float[][][] curves, float[] pcm, float[] floor, in Span<float> seeds, float specmax)
         {
             // prime the working vector with peak values
             for (var i = 0; i < _n; i++)
@@ -1073,7 +1109,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private static void SeedCurve(float[] seeds, float[][] curves, float amp, int oc, int n, int linesper,
+        private static void SeedCurve(in Span<float> seeds, float[][] curves, float amp, int oc, int n, int linesper,
             float dbOffset)
         {
             var choice = (int) ((amp + dbOffset - Level0)*.1f);
@@ -1127,9 +1163,9 @@ namespace OggVorbisEncoder.Lookups
 
         private static double ToBark(double n) => 13.1f*Math.Atan(.00074f*n) + 2.24f*Math.Atan(n*n*1.85e-8f) + 1e-4f*n;
 
-        private class ApComparer : IComparer<OffsetArray<float>>
+        private class ApComparer : IComparer<OffsetMemory<float>>
         {
-            public int Compare(OffsetArray<float> x, OffsetArray<float> y)
+            public int Compare(OffsetMemory<float> x, OffsetMemory<float> y)
             {
                 var f1 = x[0];
                 var f2 = y[0];

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Buffers;
 
 namespace OggVorbisEncoder.Lookups
 {
@@ -55,14 +55,15 @@ namespace OggVorbisEncoder.Lookups
             _scale = 4f/n;
         }
 
-        public void Forward(float[] input, float[] output)
+        public void Forward(in Span<float> input, in Span<float> output)
         {
             var n = _n;
             var n2 = n >> 1;
             var n4 = n >> 2;
             var n8 = n >> 3;
-            var work = new float[n];
-            var w2 = new Span<float>(work, n2, work.Length-n2);
+            var workArr = ArrayPool<float>.Shared.Rent(n);
+            var work = new Span<float>(workArr, 0, n);
+            var w2 = work.Slice(n2);
 
             // rotate 
             // window + rotate + step 1 
@@ -127,6 +128,8 @@ namespace OggVorbisEncoder.Lookups
                 offset += 2;
                 t += 2;
             }
+
+            ArrayPool<float>.Shared.Return(workArr);
         }
 
         private void Butterflies(in Span<float> data, int points)
@@ -355,7 +358,7 @@ namespace OggVorbisEncoder.Lookups
             } while (x2 >= 0);
         }
 
-        private void ReverseBits(float[] data)
+        private void ReverseBits(in Span<float> data)
         {
             var n = _n;
             var bit = 0;

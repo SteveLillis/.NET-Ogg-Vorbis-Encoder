@@ -106,13 +106,13 @@ namespace OggVorbisEncoder.Lookups
             var n = _n;
 
             var nonzero = 0;
-            var fits = new FitAccumulation[Posit + 1];
-            var fitValueA = new int[Posit + 2]; // index by range list position 
-            var fitValueB = new int[Posit + 2]; // index by range list position 
+            Span<FitAccumulation> fits = stackalloc FitAccumulation[Posit + 1];
+            Span<int> fitValueA = stackalloc int[Posit + 2]; // index by range list position 
+            Span<int> fitValueB = stackalloc int[Posit + 2]; // index by range list position 
 
-            var loneighbor = new int[Posit + 2]; // sorted index of range list position (+2) 
-            var hineighbor = new int[Posit + 2];
-            var memo = new int[Posit + 2];
+            Span<int> loneighbor = stackalloc int[Posit + 2]; // sorted index of range list position (+2) 
+            Span<int> hineighbor = stackalloc int[Posit + 2];
+            Span<int> memo = stackalloc int[Posit + 2];
 
             for (var i = 0; i < _posts; i++)
                 fitValueA[i] = -200; // mark all unused 
@@ -335,7 +335,7 @@ namespace OggVorbisEncoder.Lookups
             return false;
         }
 
-        private int FitLine(FitAccumulation[] acc, int offset, int fits, out int y0, out int y1)
+        private int FitLine(in Span<FitAccumulation> acc, int offset, int fits, out int y0, out int y1)
         {
             y0 = -200;
             y1 = -200;
@@ -416,7 +416,7 @@ namespace OggVorbisEncoder.Lookups
             return y0 + off;
         }
 
-        private static int PostY(int[] a, int[] b, int pos)
+        private static int PostY(in Span<int> a, in Span<int> b, int pos)
         {
             if (a[pos] < 0)
                 return b[pos];
@@ -496,7 +496,7 @@ namespace OggVorbisEncoder.Lookups
             int pcmEnd,
             int n)
         {
-            var output = new int[Posit + 2];
+            Span<int> output = stackalloc int[Posit + 2];
 
             // quantize values to multiplier spec 
             if (post != null)
