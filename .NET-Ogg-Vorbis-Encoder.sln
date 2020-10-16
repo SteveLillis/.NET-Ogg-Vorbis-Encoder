@@ -1,11 +1,12 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OggVorbisEncoder", "OggVorbisEncoder\OggVorbisEncoder.csproj", "{60268B75-5C47-4DFC-9F7A-83E47B0978CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder", "OggVorbisEncoder\OggVorbisEncoder.csproj", "{60268B75-5C47-4DFC-9F7A-83E47B0978CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OggVorbisEncoder.Example", "OggVorbisEncoder.Example\OggVorbisEncoder.Example.csproj", "{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder.Example", "OggVorbisEncoder.Example\OggVorbisEncoder.Example.csproj", "{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder.Benchmarks", "OggVorbisEncoder.Benchmarks\OggVorbisEncoder.Benchmarks.csproj", "{8151113A-24BC-4A67-B513-D43C912AE0C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{60268B75-5C47-4DFC-9F7A-83E47B0978CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,5 +42,23 @@ Global
 		{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}.Release|x64.Build.0 = Release|x64
 		{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}.Release|x86.ActiveCfg = Release|x86
 		{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}.Release|x86.Build.0 = Release|x86
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|x64.Build.0 = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Debug|x86.Build.0 = Debug|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|x64.ActiveCfg = Release|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|x64.Build.0 = Release|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|x86.ActiveCfg = Release|Any CPU
+		{8151113A-24BC-4A67-B513-D43C912AE0C0}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C6B98480-CA59-412E-937E-F66F28EC0B74}
 	EndGlobalSection
 EndGlobal
