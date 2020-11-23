@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Runtime.CompilerServices;
 
 namespace OggVorbisEncoder
 {
@@ -6,8 +6,8 @@ namespace OggVorbisEncoder
     {
         public static float ToDecibel(this float x)
         {
-            var i = BitConverter.ToUInt32(BitConverter.GetBytes(x), 0);
-            i = i & 0x7fffffff;
+            var i = Unsafe.As<float, uint>(ref x);
+            i &= 0x7fffffff;
             return i*7.17711438e-7f - 764.6161886f;
         }
     }

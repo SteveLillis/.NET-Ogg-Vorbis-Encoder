@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using OggVorbisEncoder.Setup;
 
 namespace OggVorbisEncoder.Lookups
@@ -165,7 +164,7 @@ namespace OggVorbisEncoder.Lookups
             var index = 0;
 
             // assumes integer/centered encoder codebook maptype 1 no more than dim 8 
-            var p = new int[8];
+            Span<int> p = stackalloc int[8];
             if (book.Delta != 1)
                 for (i = 0, o = book.Dimensions; i < book.Dimensions; i++)
                 {
@@ -229,7 +228,7 @@ namespace OggVorbisEncoder.Lookups
             return index;
         }
 
-        public int[][] Class(int[][] couples, IList<bool> nonzero, int channels)
+        public int[][] Class(int[][] couples, bool[] nonzero, int channels)
         {
             for (var channel = 0; channel < channels; channel++)
             {

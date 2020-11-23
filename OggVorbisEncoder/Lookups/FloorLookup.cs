@@ -101,18 +101,18 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        public int[] Fit(IList<float> logmdct, IList<float> logmask)
+        public int[] Fit(in Span<float> logmdct, float[] logmask)
         {
             var n = _n;
 
             var nonzero = 0;
-            var fits = new FitAccumulation[Posit + 1];
-            var fitValueA = new int[Posit + 2]; // index by range list position 
-            var fitValueB = new int[Posit + 2]; // index by range list position 
+            Span<FitAccumulation> fits = stackalloc FitAccumulation[Posit + 1];
+            Span<int> fitValueA = stackalloc int[Posit + 2]; // index by range list position 
+            Span<int> fitValueB = stackalloc int[Posit + 2]; // index by range list position 
 
-            var loneighbor = new int[Posit + 2]; // sorted index of range list position (+2) 
-            var hineighbor = new int[Posit + 2];
-            var memo = new int[Posit + 2];
+            Span<int> loneighbor = stackalloc int[Posit + 2]; // sorted index of range list position (+2) 
+            Span<int> hineighbor = stackalloc int[Posit + 2];
+            Span<int> memo = stackalloc int[Posit + 2];
 
             for (var i = 0; i < _posts; i++)
                 fitValueA[i] = -200; // mark all unused 
@@ -268,7 +268,7 @@ namespace OggVorbisEncoder.Lookups
             return null;
         }
 
-        private bool InspectError(int x0, int x1, int y0, int y1, IList<float> mask, IList<float> mdct)
+        private bool InspectError(int x0, int x1, int y0, int y1, float[] mask, in Span<float> mdct)
         {
             var dy = y1 - y0;
             var adx = x1 - x0;
@@ -335,7 +335,7 @@ namespace OggVorbisEncoder.Lookups
             return false;
         }
 
-        private int FitLine(IList<FitAccumulation> acc, int offset, int fits, out int y0, out int y1)
+        private int FitLine(in Span<FitAccumulation> acc, int offset, int fits, out int y0, out int y1)
         {
             y0 = -200;
             y1 = -200;
@@ -416,7 +416,7 @@ namespace OggVorbisEncoder.Lookups
             return y0 + off;
         }
 
-        private static int PostY(int[] a, int[] b, int pos)
+        private static int PostY(in Span<int> a, in Span<int> b, int pos)
         {
             if (a[pos] < 0)
                 return b[pos];
@@ -427,7 +427,7 @@ namespace OggVorbisEncoder.Lookups
             return (a[pos] + b[pos]) >> 1;
         }
 
-        private int AccumulateFit(IList<float> flr, IList<float> mdct, int x0, int x1, ref FitAccumulation fits, int n)
+        private int AccumulateFit(float[] flr, in Span<float> mdct, int x0, int x1, ref FitAccumulation fits, int n)
         {
             int xa = 0, ya = 0, x2a = 0, xya = 0, na = 0, xb = 0, yb = 0, x2b = 0, xyb = 0, nb = 0;
 
@@ -490,13 +490,13 @@ namespace OggVorbisEncoder.Lookups
         public bool Encode(
             EncodeBuffer buffer,
             IList<IStaticCodeBook> staticBooks,
-            IList<CodeBook> books,
+            CodeBook[] books,
             int[] post,
             int[] ilogmask,
             int pcmEnd,
             int n)
         {
-            var output = new int[Posit + 2];
+            Span<int> output = stackalloc int[Posit + 2];
 
             // quantize values to multiplier spec 
             if (post != null)
