@@ -48,15 +48,12 @@ namespace OggVorbisEncoder.Lookups
             int channels,
             int[][] partword)
         {
-            switch (_residue.ResidueType)
+            return _residue.ResidueType switch
             {
-                case ResidueType.One:
-                    return Res1Forward(buffer, pcmend, couples, nonzero, channels, partword);
-                case ResidueType.Two:
-                    return Res2Forward(buffer, pcmend, couples, nonzero, channels, partword);
-                default: throw new NotImplementedException();
-            }
-
+                ResidueType.One => Res1Forward(buffer, pcmend, couples, nonzero, channels, partword),
+                ResidueType.Two => Res2Forward(buffer, pcmend, couples, nonzero, channels, partword),
+                _ => throw new NotImplementedException(),
+            };
         }
 
         private int Res1Forward(EncodeBuffer buffer, int pcmend, int[][] couples, bool[] nonzero, int channels,
@@ -145,7 +142,7 @@ namespace OggVorbisEncoder.Lookups
             return 0;
         }
 
-        private void EncodePart(EncodeBuffer buffer, int[] vec, int offset, int n, CodeBook book)
+        private static void EncodePart(EncodeBuffer buffer, int[] vec, int offset, int n, CodeBook book)
         {
             var step = n/book.Dimensions;
 
@@ -256,15 +253,15 @@ namespace OggVorbisEncoder.Lookups
             for(int c = 0;c<channels;c++)
                 partword[c] = new int[valueCount];
 
-            int j = 0, k = 0;
-
             for (int i = 0; i < valueCount; i++)
             {
                 int offset = i * _residue.Grouping + _residue.Begin;
+                int j;
                 for (j = 0; j < channels; j++)
                 {
                     int max = 0;
                     int ent = 0;
+                    int k;
                     for (k = 0; k < _residue.Grouping; k++)
                     {
                         if (Math.Abs(couples[j][offset + k]) > max) max = Math.Abs(couples[j][offset + k]);

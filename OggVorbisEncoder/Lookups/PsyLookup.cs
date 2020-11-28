@@ -429,7 +429,7 @@ namespace OggVorbisEncoder.Lookups
                 if (offsetIndex == 1)
                 {
                     double coeffi = -17.2f; // AoTuV
-                    val = val - logmdct[i]; // val == mdct line value relative to floor in dB 
+                    val -= logmdct[i]; // val == mdct line value relative to floor in dB 
 
                     double de;
                     if (val > coeffi)
@@ -1089,7 +1089,7 @@ namespace OggVorbisEncoder.Lookups
 
                 if (max + 6f > floor[i])
                 {
-                    oc = oc >> _shiftOctave;
+                    oc >>= _shiftOctave;
 
                     if (oc >= PsyInfo.Bands)
                         oc = PsyInfo.Bands - 1;

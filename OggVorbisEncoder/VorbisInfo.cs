@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using OggVorbisEncoder.Setup;
 using OggVorbisEncoder.Setup.Templates;

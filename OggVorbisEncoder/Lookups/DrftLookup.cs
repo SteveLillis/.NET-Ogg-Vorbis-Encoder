@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace OggVorbisEncoder.Lookups
 {
@@ -15,20 +14,20 @@ namespace OggVorbisEncoder.Lookups
             _trigCache = new float[3*n];
             _splitCache = new int[32];
 
-            fdrffti(n);
+            Fdrffti(n);
         }
 
         public int N { get; }
 
-        private void fdrffti(int n)
+        private void Fdrffti(int n)
         {
             if (n == 1)
                 return;
 
-            drfti1(n);
+            Drfti1(n);
         }
 
-        private void drfti1(int n)
+        private void Drfti1(int n)
         {
             int[] ntryh = {4, 2, 3, 5};
             const float tpi = 6.28318530717958648f;
@@ -136,21 +135,21 @@ namespace OggVorbisEncoder.Lookups
 
                         if (na != 0)
                         {
-                            dradfg(ido, ip, l1, idl1, _trigCache, _trigCache, _trigCache, data, data, N + iw - 1);
+                            Dradfg(ido, ip, l1, idl1, _trigCache, _trigCache, _trigCache, data, data, N + iw - 1);
                             na = 0;
                         }
                         else
                         {
-                            dradfg(ido, ip, l1, idl1, data, data, data, _trigCache, _trigCache, N + iw - 1);
+                            Dradfg(ido, ip, l1, idl1, data, data, data, _trigCache, _trigCache, N + iw - 1);
                             na = 1;
                         }
                     }
                     else
                     {
                         if (na != 0)
-                            dradf2(ido, l1, _trigCache, data, N + iw - 1);
+                            Dradf2(ido, l1, _trigCache, data, N + iw - 1);
                         else
-                            dradf2(ido, l1, data, _trigCache, N + iw - 1);
+                            Dradf2(ido, l1, data, _trigCache, N + iw - 1);
                     }
                 }
                 else
@@ -159,9 +158,9 @@ namespace OggVorbisEncoder.Lookups
                     var ix3 = ix2 + ido;
 
                     if (na != 0)
-                        dradf4(ido, l1, _trigCache, data, N + iw - 1, N + ix2 - 1, N + ix3 - 1);
+                        Dradf4(ido, l1, _trigCache, data, N + iw - 1, N + ix2 - 1, N + ix3 - 1);
                     else
-                        dradf4(ido, l1, data, _trigCache, N + iw - 1, N + ix2 - 1, N + ix3 - 1);
+                        Dradf4(ido, l1, data, _trigCache, N + iw - 1, N + ix2 - 1, N + ix3 - 1);
                 }
 
                 l2 = l1;
@@ -174,7 +173,7 @@ namespace OggVorbisEncoder.Lookups
                 data[i] = _trigCache[i];
         }
 
-        private void dradf4(int ido, int l1, float[] cc, float[] ch, int wa1, int wa2, int wa3)
+        private void Dradf4(int ido, int l1, float[] cc, float[] ch, int wa1, int wa2, int wa3)
         {
             const float hsqt2 = .70710678118654752f;
             int k, t5, t6;
@@ -282,7 +281,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private void dradf2(int ido, int l1, float[] cc, float[] ch, int wa1)
+        private void Dradf2(int ido, int l1, float[] cc, float[] ch, int wa1)
         {
             var t1 = 0;
             var t2 = l1*ido;
@@ -342,7 +341,7 @@ namespace OggVorbisEncoder.Lookups
             }
         }
 
-        private void dradfg(int ido, int ip, int l1, int idl1, float[] cc, float[] c1, float[] c2,
+        private void Dradfg(int ido, int ip, int l1, int idl1, float[] cc, float[] c1, float[] c2,
             float[] ch, float[] ch2, int wa)
         {
             const float tpi = 6.283185307179586f;

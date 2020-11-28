@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace OggVorbisEncoder
 {
     public static class Block
