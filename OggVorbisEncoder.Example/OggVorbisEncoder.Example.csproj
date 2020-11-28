@@ -10,5 +10,11 @@
   <ItemGroup>
     <ProjectReference Include="../OggVorbisEncoder/OggVorbisEncoder.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="unencoded.raw">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   
 </Project>
