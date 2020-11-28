@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using OggVorbisEncoder.Lookups;
 using OggVorbisEncoder.Setup;
 
@@ -132,7 +131,7 @@ namespace OggVorbisEncoder
                 float y = 0;
 
                 for (var j = 0; j < m; j++)
-                    y = y - work[o++]*lpcCoeff[--p];
+                    y -= work[o++]*lpcCoeff[--p];
 
                 data[offset + i] = work[o] = y;
             }

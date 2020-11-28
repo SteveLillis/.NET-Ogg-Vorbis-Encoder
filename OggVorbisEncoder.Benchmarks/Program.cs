@@ -17,122 +17,119 @@ namespace OggVorbisEncoder.Benchmarks
         }
 
         [Benchmark]
-        public byte[] ConvertPCMFile() => ConvertRawPCMFile(44100, 2, pcmBytes, PCMSample.SixteenBit, 44100, 2);
+        public byte[] ConvertPCMFile() => ConvertRawPCMFile(44100, 2, pcmBytes, PcmSample.SixteenBit, 44100, 2);
 
-        private byte[] ConvertRawPCMFile(int OutputSampleRate, int OutputChannels, byte[] PCMSamples, PCMSample PCMSampleSize, int PCMSampleRate, int PCMChannels)
+        private byte[] ConvertRawPCMFile(int outputSampleRate, int outputChannels, byte[] pcmSamples, PcmSample pcmSampleSize, int pcmSampleRate, int pcmChannels)
         {
-            int NumPCMSamples = (PCMSamples.Length / (int)PCMSampleSize / PCMChannels);
-            float PCMDuraton = NumPCMSamples / (float)PCMSampleRate;
+            int numPcmSamples = (pcmSamples.Length / (int)pcmSampleSize / pcmChannels);
+            float pcmDuraton = numPcmSamples / (float)pcmSampleRate;
 
-            int NumOutputSamples = (int)(PCMDuraton * OutputSampleRate);
+            int numOutputSamples = (int)(pcmDuraton * outputSampleRate);
             //Ensure that samble buffer is aligned to write chunk size
-            NumOutputSamples = (NumOutputSamples / WriteBufferSize) * WriteBufferSize;
+            numOutputSamples = (numOutputSamples / WriteBufferSize) * WriteBufferSize;
 
-            float[][] OutSamples = new float[OutputChannels][];
+            float[][] outSamples = new float[outputChannels][];
 
-            for (int ch = 0; ch < OutputChannels; ch++)
-                OutSamples[ch] = new float[NumOutputSamples];
+            for (int ch = 0; ch < outputChannels; ch++)
+            {
+                outSamples[ch] = new float[numOutputSamples];
+            }
 
-            for (int sampleNumber = 0; sampleNumber < NumOutputSamples; sampleNumber++)
+            for (int sampleNumber = 0; sampleNumber < numOutputSamples; sampleNumber++)
             {
                 float rawSample = 0.0f;
 
-                for (int ch = 0; ch < OutputChannels; ch++)
+                for (int ch = 0; ch < outputChannels; ch++)
                 {
-                    int sampleIndex = (sampleNumber * PCMChannels) * (int)PCMSampleSize;
+                    int sampleIndex = (sampleNumber * pcmChannels) * (int)pcmSampleSize;
 
-                    if (ch < PCMChannels) sampleIndex += (ch * (int)PCMSampleSize);
+                    if (ch < pcmChannels) sampleIndex += (ch * (int)pcmSampleSize);
 
-                    switch (PCMSampleSize)
+                    switch (pcmSampleSize)
                     {
-                        case PCMSample.EightBit:
-                            rawSample = ByteToSample(PCMSamples[sampleIndex]);
+                        case PcmSample.EightBit:
+                            rawSample = ByteToSample(pcmSamples[sampleIndex]);
                             break;
-                        case PCMSample.SixteenBit:
-                            rawSample = ShortToSample((short)(PCMSamples[sampleIndex + 1] << 8 | PCMSamples[sampleIndex]));
+                        case PcmSample.SixteenBit:
+                            rawSample = ShortToSample((short)(pcmSamples[sampleIndex + 1] << 8 | pcmSamples[sampleIndex]));
                             break;
                     }
 
-                    OutSamples[ch][sampleNumber] = rawSample;
+                    outSamples[ch][sampleNumber] = rawSample;
                 }
             }
 
-            return GenerateFile(OutSamples, OutputSampleRate, OutputChannels);
+            return GenerateFile(outSamples, outputSampleRate, outputChannels);
         }
 
-        private byte[] GenerateFile(float[][] FloatSamples, int SampleRate, int Channels)
+        private byte[] GenerateFile(float[][] floatSamples, int sampleRate, int channels)
         {
-            using (MemoryStream outputData = new MemoryStream())
+            using MemoryStream outputData = new MemoryStream();
+
+            // Stores all the static vorbis bitstream settings
+            var info = VorbisInfo.InitVariableBitRate(channels, sampleRate, 0.5f);
+
+            // set up our packet->stream encoder
+            var serial = new Random().Next();
+            var oggStream = new OggStream(serial);
+
+            // =========================================================
+            // HEADER
+            // =========================================================
+            // Vorbis streams begin with three headers; the initial header (with
+            // most of the codec setup parameters) which is mandated by the Ogg
+            // bitstream spec.  The second header holds any comment fields.  The
+            // third header holds the bitstream codebook.
+
+            var comments = new Comments();
+            comments.AddTag("ARTIST", "TEST");
+
+            var infoPacket = HeaderPacketBuilder.BuildInfoPacket(info);
+            var commentsPacket = HeaderPacketBuilder.BuildCommentsPacket(comments);
+            var booksPacket = HeaderPacketBuilder.BuildBooksPacket(info);
+
+            oggStream.PacketIn(infoPacket);
+            oggStream.PacketIn(commentsPacket);
+            oggStream.PacketIn(booksPacket);
+
+            // Flush to force audio data onto its own page per the spec
+            FlushPages(oggStream, outputData, true);
+
+            // =========================================================
+            // BODY (Audio Data)
+            // =========================================================
+            var processingState = ProcessingState.Create(info);
+
+            for (int readIndex = 0; readIndex <= floatSamples[0].Length; readIndex += WriteBufferSize)
             {
-                // Stores all the static vorbis bitstream settings
-                var info = VorbisInfo.InitVariableBitRate(Channels, SampleRate, 0.5f);
-
-                // set up our packet->stream encoder
-                var serial = new Random().Next();
-                var oggStream = new OggStream(serial);
-
-                // =========================================================
-                // HEADER
-                // =========================================================
-                // Vorbis streams begin with three headers; the initial header (with
-                // most of the codec setup parameters) which is mandated by the Ogg
-                // bitstream spec.  The second header holds any comment fields.  The
-                // third header holds the bitstream codebook.
-                var headerBuilder = new HeaderPacketBuilder();
-
-                var comments = new Comments();
-                comments.AddTag("ARTIST", "TEST");
-
-                var infoPacket = headerBuilder.BuildInfoPacket(info);
-                var commentsPacket = headerBuilder.BuildCommentsPacket(comments);
-                var booksPacket = headerBuilder.BuildBooksPacket(info);
-
-                oggStream.PacketIn(infoPacket);
-                oggStream.PacketIn(commentsPacket);
-                oggStream.PacketIn(booksPacket);
-
-                // Flush to force audio data onto its own page per the spec
-                FlushPages(oggStream, outputData, true);
-
-                // =========================================================
-                // BODY (Audio Data)
-                // =========================================================
-                var processingState = ProcessingState.Create(info);
-
-                for (int readIndex = 0; readIndex <= FloatSamples[0].Length; readIndex += WriteBufferSize)
+                if (readIndex == floatSamples[0].Length)
                 {
-                    if (readIndex == FloatSamples[0].Length)
-                    {
-                        processingState.WriteEndOfStream();
-                    }
-                    else
-                    {
-                        processingState.WriteData(FloatSamples, WriteBufferSize, readIndex);
-                    }
-
-                    OggPacket packet;
-                    while (!oggStream.Finished
-                            && processingState.PacketOut(out packet))
-                    {
-                        oggStream.PacketIn(packet);
-
-                        FlushPages(oggStream, outputData, false);
-                    }
+                    processingState.WriteEndOfStream();
+                }
+                else
+                {
+                    processingState.WriteData(floatSamples, WriteBufferSize, readIndex);
                 }
 
-                FlushPages(oggStream, outputData, true);
+                while (!oggStream.Finished && processingState.PacketOut(out OggPacket packet))
+                {
+                    oggStream.PacketIn(packet);
 
-                return outputData.ToArray();
+                    FlushPages(oggStream, outputData, false);
+                }
             }
+
+            FlushPages(oggStream, outputData, true);
+
+            return outputData.ToArray();
         }
 
-        private static void FlushPages(OggStream oggStream, Stream Output, bool Force)
+        private static void FlushPages(OggStream oggStream, Stream output, bool force)
         {
-            OggPage page;
-            while (oggStream.PageOut(out page, Force))
+            while (oggStream.PageOut(out OggPage page, force))
             {
-                Output.Write(page.Header, 0, page.Header.Length);
-                Output.Write(page.Body, 0, page.Body.Length);
+                output.Write(page.Header, 0, page.Header.Length);
+                output.Write(page.Body, 0, page.Body.Length);
             }
         }
 
@@ -146,7 +143,7 @@ namespace OggVorbisEncoder.Benchmarks
             return pcmValue / 32768f;
         }
 
-        enum PCMSample : int
+        enum PcmSample : int
         {
             EightBit = 1,
             SixteenBit = 2

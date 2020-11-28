@@ -5,7 +5,7 @@ namespace OggVorbisEncoder.Example
 {
     public class Encoder
     {
-        private static int WriteBufferSize = 512;
+        private static readonly int WriteBufferSize = 512;
         private static readonly int[] SampleRates = { 8000, 11025, 16000, 22050, 32000, 44100 };
 
         [STAThread]
@@ -17,27 +17,27 @@ namespace OggVorbisEncoder.Example
         private static void ConvertPCMFile()
         {
             var pcmBytes = File.ReadAllBytes("unencoded.raw");
-            var oggBytes = ConvertRawPCMFile(44100, 2, pcmBytes, PCMSample.SixteenBit, 44100, 2);
+            var oggBytes = ConvertRawPCMFile(44100, 2, pcmBytes, PcmSample.SixteenBit, 44100, 2);
             File.WriteAllBytes("encoded.ogg", oggBytes);
         }
 
         private static void GenerateTestFiles()
         {
-            int Frequency = 1000;
+            int frequency = 1000;
 
-            for (int Channels = 1; Channels <= 2; Channels++)
+            for (int channels = 1; channels <= 2; channels++)
             {
                 foreach (var sampleRate in SampleRates)
                 {
                     try
                     {
-                        var sineBytes = GenerateSineWaveFile(sampleRate, Channels, Frequency, 10.0f);
-                        File.WriteAllBytes($"C:/Temp/Sine_{sampleRate}_{Frequency}hz_{Channels}.ogg", sineBytes);
-                        Console.WriteLine($"{sampleRate} samples/s, {Channels} channels succeeded.");
+                        var sineBytes = GenerateSineWaveFile(sampleRate, channels, frequency, 10.0f);
+                        File.WriteAllBytes($"C:/Temp/Sine_{sampleRate}_{frequency}hz_{channels}.ogg", sineBytes);
+                        Console.WriteLine($"{sampleRate} samples/s, {channels} channels succeeded.");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"{sampleRate} samples/s, {Channels} channels failed. {ex.Message}");
+                        Console.WriteLine($"{sampleRate} samples/s, {channels} channels failed. {ex.Message}");
                     }
                 }
             }
@@ -45,147 +45,146 @@ namespace OggVorbisEncoder.Example
             Console.ReadLine();
         }
 
-        private static byte[] ConvertRawPCMFile(int OutputSampleRate, int OutputChannels, byte[] PCMSamples, PCMSample PCMSampleSize, int PCMSampleRate, int PCMChannels)
+        private static byte[] ConvertRawPCMFile(int outputSampleRate, int outputChannels, byte[] pcmSamples, PcmSample pcmSampleSize, int pcmSampleRate, int pcmChannels)
         {
-            int NumPCMSamples = (PCMSamples.Length / (int)PCMSampleSize / PCMChannels);
-            float PCMDuraton = NumPCMSamples / (float)PCMSampleRate;
+            int numPcmSamples = (pcmSamples.Length / (int)pcmSampleSize / pcmChannels);
+            float pcmDuraton = numPcmSamples / (float)pcmSampleRate;
 
-            int NumOutputSamples = (int)(PCMDuraton * OutputSampleRate);
+            int numOutputSamples = (int)(pcmDuraton * outputSampleRate);
             //Ensure that samble buffer is aligned to write chunk size
-            NumOutputSamples = (NumOutputSamples / WriteBufferSize) * WriteBufferSize;
+            numOutputSamples = (numOutputSamples / WriteBufferSize) * WriteBufferSize;
 
-            float[][] OutSamples = new float[OutputChannels][];
+            float[][] outSamples = new float[outputChannels][];
 
-            for (int ch = 0; ch < OutputChannels; ch++)
-                OutSamples[ch] = new float[NumOutputSamples];
+            for (int ch = 0; ch < outputChannels; ch++)
+            {
+                outSamples[ch] = new float[numOutputSamples];
+            }
 
-            for(int sampleNumber = 0; sampleNumber < NumOutputSamples; sampleNumber++)
+            for(int sampleNumber = 0; sampleNumber < numOutputSamples; sampleNumber++)
             {
                 float rawSample = 0.0f;
 
-                for (int ch = 0; ch < OutputChannels; ch++)
+                for (int ch = 0; ch < outputChannels; ch++)
                 {
-                    int sampleIndex = (sampleNumber * PCMChannels) * (int)PCMSampleSize;
+                    int sampleIndex = (sampleNumber * pcmChannels) * (int)pcmSampleSize;
 
-                    if (ch < PCMChannels) sampleIndex += (ch * (int)PCMSampleSize);
+                    if (ch < pcmChannels) sampleIndex += (ch * (int)pcmSampleSize);
                     
-                    switch (PCMSampleSize)
+                    switch (pcmSampleSize)
                     {
-                        case PCMSample.EightBit:
-                            rawSample = ByteToSample(PCMSamples[sampleIndex]);
+                        case PcmSample.EightBit:
+                            rawSample = ByteToSample(pcmSamples[sampleIndex]);
                             break;
-                        case PCMSample.SixteenBit:
-                            rawSample = ShortToSample((short)(PCMSamples[sampleIndex + 1] << 8 | PCMSamples[sampleIndex]));
+                        case PcmSample.SixteenBit:
+                            rawSample = ShortToSample((short)(pcmSamples[sampleIndex + 1] << 8 | pcmSamples[sampleIndex]));
                             break;
                     }
 
-                    OutSamples[ch][sampleNumber] = rawSample;
+                    outSamples[ch][sampleNumber] = rawSample;
                 }
             }
 
-            return GenerateFile(OutSamples, OutputSampleRate, OutputChannels);
+            return GenerateFile(outSamples, outputSampleRate, outputChannels);
         }
 
-        private static byte[] GenerateSineWaveFile(int OutputSampleRate, int OutputChannels, int Frequency, float DurationSeconds, float Volume = 0.2f)
+        private static byte[] GenerateSineWaveFile(int outputSampleRate, int outputChannels, int frequency, float durationSeconds, float volume = 0.2f)
         {
-            float[][] OutSamples = new float[OutputChannels][];
+            float[][] outSamples = new float[outputChannels][];
 
-            int NumOutputSamples = (int)(DurationSeconds * OutputSampleRate);
+            int numOutputSamples = (int)(durationSeconds * outputSampleRate);
             //Ensure that samble buffer is aligned to write chunk size
-            NumOutputSamples = (NumOutputSamples / WriteBufferSize) * WriteBufferSize;
+            numOutputSamples = (numOutputSamples / WriteBufferSize) * WriteBufferSize;
 
-            for (int ch = 0; ch < OutputChannels; ch++)
-                OutSamples[ch] = new float[NumOutputSamples];
-
-            for (int i = 0; i < NumOutputSamples; i++)
+            for (int ch = 0; ch < outputChannels; ch++)
             {
-                var sample = Volume * SineSample(i, Frequency, OutputSampleRate);
-                for (int ch = 0; ch < OutputChannels; ch++)
-                    OutSamples[ch][i] = sample;
+                outSamples[ch] = new float[numOutputSamples];
             }
 
-            return GenerateFile(OutSamples, OutputSampleRate, OutputChannels);
+            for (int i = 0; i < numOutputSamples; i++)
+            {
+                var sample = volume * SineSample(i, frequency, outputSampleRate);
+                for (int ch = 0; ch < outputChannels; ch++)
+                    outSamples[ch][i] = sample;
+            }
+
+            return GenerateFile(outSamples, outputSampleRate, outputChannels);
         }
 
-        private static byte[] GenerateFile(float[][] FloatSamples, int SampleRate, int Channels)
+        private static byte[] GenerateFile(float[][] floatSamples, int sampleRate, int channels)
         {
-            using (MemoryStream outputData = new MemoryStream())
+            using MemoryStream outputData = new MemoryStream();
+
+            // Stores all the static vorbis bitstream settings
+            var info = VorbisInfo.InitVariableBitRate(channels, sampleRate, 0.5f);
+
+            // set up our packet->stream encoder
+            var serial = new Random().Next();
+            var oggStream = new OggStream(serial);
+
+            // =========================================================
+            // HEADER
+            // =========================================================
+            // Vorbis streams begin with three headers; the initial header (with
+            // most of the codec setup parameters) which is mandated by the Ogg
+            // bitstream spec.  The second header holds any comment fields.  The
+            // third header holds the bitstream codebook.
+
+            var comments = new Comments();
+            comments.AddTag("ARTIST", "TEST");
+
+            var infoPacket = HeaderPacketBuilder.BuildInfoPacket(info);
+            var commentsPacket = HeaderPacketBuilder.BuildCommentsPacket(comments);
+            var booksPacket = HeaderPacketBuilder.BuildBooksPacket(info);
+
+            oggStream.PacketIn(infoPacket);
+            oggStream.PacketIn(commentsPacket);
+            oggStream.PacketIn(booksPacket);
+
+            // Flush to force audio data onto its own page per the spec
+            FlushPages(oggStream, outputData, true);
+
+            // =========================================================
+            // BODY (Audio Data)
+            // =========================================================
+            var processingState = ProcessingState.Create(info);
+
+            for (int readIndex = 0; readIndex <= floatSamples[0].Length; readIndex += WriteBufferSize)
             {
-                // Stores all the static vorbis bitstream settings
-                var info = VorbisInfo.InitVariableBitRate(Channels, SampleRate, 0.5f);
-
-                // set up our packet->stream encoder
-                var serial = new Random().Next();
-                var oggStream = new OggStream(serial);
-
-                // =========================================================
-                // HEADER
-                // =========================================================
-                // Vorbis streams begin with three headers; the initial header (with
-                // most of the codec setup parameters) which is mandated by the Ogg
-                // bitstream spec.  The second header holds any comment fields.  The
-                // third header holds the bitstream codebook.
-                var headerBuilder = new HeaderPacketBuilder();
-
-                var comments = new Comments();
-                comments.AddTag("ARTIST", "TEST");
-
-                var infoPacket = headerBuilder.BuildInfoPacket(info);
-                var commentsPacket = headerBuilder.BuildCommentsPacket(comments);
-                var booksPacket = headerBuilder.BuildBooksPacket(info);
-
-                oggStream.PacketIn(infoPacket);
-                oggStream.PacketIn(commentsPacket);
-                oggStream.PacketIn(booksPacket);
-
-                // Flush to force audio data onto its own page per the spec
-                FlushPages(oggStream, outputData, true);
-
-                // =========================================================
-                // BODY (Audio Data)
-                // =========================================================
-                var processingState = ProcessingState.Create(info);
-                
-                for (int readIndex = 0; readIndex <= FloatSamples[0].Length; readIndex += WriteBufferSize)
+                if (readIndex == floatSamples[0].Length)
                 {
-                    if(readIndex == FloatSamples[0].Length)
-                    {
-                        processingState.WriteEndOfStream();
-                    }
-                    else
-                    {
-                        processingState.WriteData(FloatSamples, WriteBufferSize, readIndex);
-                    }
-
-                    OggPacket packet;
-                    while (!oggStream.Finished
-                            && processingState.PacketOut(out packet))
-                    {
-                        oggStream.PacketIn(packet);
-
-                        FlushPages(oggStream, outputData, false);
-                    }
+                    processingState.WriteEndOfStream();
+                }
+                else
+                {
+                    processingState.WriteData(floatSamples, WriteBufferSize, readIndex);
                 }
 
-                FlushPages(oggStream, outputData, true);
+                while (!oggStream.Finished && processingState.PacketOut(out OggPacket packet))
+                {
+                    oggStream.PacketIn(packet);
 
-                return outputData.ToArray();
+                    FlushPages(oggStream, outputData, false);
+                }
             }
+
+            FlushPages(oggStream, outputData, true);
+
+            return outputData.ToArray();
         }
 
-        private static void FlushPages(OggStream oggStream, Stream Output, bool Force)
+        private static void FlushPages(OggStream oggStream, Stream output, bool force)
         {
-            OggPage page;
-            while (oggStream.PageOut(out page, Force))
+            while (oggStream.PageOut(out OggPage page, force))
             {
-                Output.Write(page.Header, 0, page.Header.Length);
-                Output.Write(page.Body, 0, page.Body.Length);
+                output.Write(page.Header, 0, page.Header.Length);
+                output.Write(page.Body, 0, page.Body.Length);
             }
         }
 
-        private static float SineSample(int sample, float frequency, int samplerate)
+        private static float SineSample(int sample, float frequency, int sampleRate)
         {
-            float sampleT = ((float)sample) / samplerate;
+            float sampleT = ((float)sample) / sampleRate;
             return MathF.Sin(sampleT * MathF.PI * 2.0f * frequency);
         }
 
@@ -200,22 +199,24 @@ namespace OggVorbisEncoder.Example
         }
 
         /// <summary>
-        ///     We cheat on the WAV header; we just bypass the header and never
-        ///     verify that it matches 16bit/stereo/44.1kHz.This is just an
-        ///     example, after all.
+        /// We cheat on the WAV header; we just bypass the header and never
+        /// verify that it matches 16bit/stereo/44.1kHz.This is just an
+        /// example, after all.
         /// </summary>
         private static void StripWavHeader(BinaryReader stdin)
         {
             var tempBuffer = new byte[6];
             for (var i = 0; (i < 30) && (stdin.Read(tempBuffer, 0, 2) > 0); i++)
+            {
                 if ((tempBuffer[0] == 'd') && (tempBuffer[1] == 'a'))
                 {
                     stdin.Read(tempBuffer, 0, 6);
                     break;
                 }
+            }
         }
 
-        enum PCMSample : int
+        enum PcmSample : int
         {
             EightBit = 1,
             SixteenBit = 2

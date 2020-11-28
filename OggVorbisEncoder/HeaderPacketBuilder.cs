@@ -3,12 +3,12 @@ using OggVorbisEncoder.Setup;
 
 namespace OggVorbisEncoder
 {
-    public class HeaderPacketBuilder
+    public static class HeaderPacketBuilder
     {
         private const string VorbisString = "vorbis";
         private const string VendorString = "OggVorbisEncoder";
 
-        public OggPacket BuildInfoPacket(VorbisInfo info)
+        public static OggPacket BuildInfoPacket(VorbisInfo info)
         {
             var buffer = new EncodeBuffer();
 
@@ -18,7 +18,7 @@ namespace OggVorbisEncoder
             return new OggPacket(bytes, false, 0, 0);
         }
 
-        public OggPacket BuildCommentsPacket(Comments comments)
+        public static OggPacket BuildCommentsPacket(Comments comments)
         {
             var buffer = new EncodeBuffer();
 
@@ -28,7 +28,7 @@ namespace OggVorbisEncoder
             return new OggPacket(bytes, false, 0, 1);
         }
 
-        public OggPacket BuildBooksPacket(VorbisInfo info)
+        public static OggPacket BuildBooksPacket(VorbisInfo info)
         {
             var buffer = new EncodeBuffer(4096);
 
@@ -38,7 +38,7 @@ namespace OggVorbisEncoder
             return new OggPacket(bytes, false, 0, 2);
         }
 
-        private void PackBooks(EncodeBuffer buffer, VorbisInfo info)
+        private static void PackBooks(EncodeBuffer buffer, VorbisInfo info)
         {
             var codecSetup = info.CodecSetup;
 
@@ -227,7 +227,7 @@ namespace OggVorbisEncoder
             }
         }
 
-        private void PackStaticBook(EncodeBuffer buffer, IStaticCodeBook book)
+        private static void PackStaticBook(EncodeBuffer buffer, IStaticCodeBook book)
         {
             var ordered = false;
 

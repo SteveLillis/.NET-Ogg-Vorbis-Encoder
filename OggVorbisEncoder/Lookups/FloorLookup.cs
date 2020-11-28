@@ -140,8 +140,7 @@ namespace OggVorbisEncoder.Lookups
             if (nonzero != 0)
             {
                 // start by fitting the implicit base case.... 
-                int y0, y1;
-                FitLine(fits, 0, _posts - 1, out y0, out y1);
+                FitLine(fits, 0, _posts - 1, out int y0, out int y1);
 
                 fitValueA[0] = y0;
                 fitValueB[0] = y0;
@@ -179,10 +178,8 @@ namespace OggVorbisEncoder.Lookups
                             if (InspectError(lx, hx, ly, hy, logmask, logmdct))
                             {
                                 // outside error bounds/begin search area.  Split it. 
-                                int ly0, ly1, hy0, hy1;
-                                var ret0 = FitLine(fits, lowSortPosition, sortPosition - lowSortPosition, out ly0,
-                                    out ly1);
-                                var ret1 = FitLine(fits, sortPosition, highSortPosition - sortPosition, out hy0, out hy1);
+                                var ret0 = FitLine(fits, lowSortPosition, sortPosition - lowSortPosition, out int ly0, out int ly1);
+                                var ret1 = FitLine(fits, sortPosition, highSortPosition - sortPosition, out int hy0, out int hy1);
 
                                 if (ret0 != 0)
                                 {
@@ -297,7 +294,7 @@ namespace OggVorbisEncoder.Lookups
 
             while (++x < x1)
             {
-                err = err + ady;
+                err += ady;
                 if (err >= adx)
                 {
                     err -= adx;
@@ -562,7 +559,7 @@ namespace OggVorbisEncoder.Lookups
                             else
                                 val = -1 - (val << 1);
                         else if (val >= headroom)
-                            val = val + headroom;
+                            val += headroom;
                         else
                             val <<= 1;
 
@@ -667,7 +664,7 @@ namespace OggVorbisEncoder.Lookups
             return false;
         }
 
-        private void RenderLine0(int n, int x0, int x1, int y0, int y1, int[] d)
+        private static void RenderLine0(int n, int x0, int x1, int y0, int y1, int[] d)
         {
             var dy = y1 - y0;
             var adx = x1 - x0;
@@ -688,7 +685,7 @@ namespace OggVorbisEncoder.Lookups
 
             while (++x < n)
             {
-                err = err + ady;
+                err += ady;
                 if (err >= adx)
                 {
                     err -= adx;

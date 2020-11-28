@@ -13,7 +13,7 @@ namespace OggVorbisEncoder
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.Append(tag);
-            stringBuilder.Append("=");
+            stringBuilder.Append('=');
             stringBuilder.Append(contents);
             _userComments.Add(stringBuilder.ToString());
         }
