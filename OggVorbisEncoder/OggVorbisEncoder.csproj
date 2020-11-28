@@ -1,9 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461;net5.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <Authors>Steve Lillis</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder</PackageProjectUrl>
+    <Description>A .NET Ogg Vorbis audio encoding library written entirely in managed code.</Description>
+    <Owners>SteveLillis, cabauman</Owners>
+    <PackageTags>vorbis;ogg;encoder</PackageTags>
+    <RepositoryUrl>https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>1.2.0</Version>
+    <PackageReleaseNotes>v1.2.0
+- Update target frameworks to netstandard2.0;net461;net5.0
+- Memory and performance improvements
+- Support for all Stereo and Decoupled configurations</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
