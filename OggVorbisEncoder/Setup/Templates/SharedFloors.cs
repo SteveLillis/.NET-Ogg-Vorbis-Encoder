@@ -1,11 +1,11 @@
 ﻿using OggVorbisEncoder.Setup.Templates.FloorBooks;
 
-namespace OggVorbisEncoder.Setup.Templates
+namespace OggVorbisEncoder.Setup.Templates;
+
+public static class SharedFloors
 {
-    public static class SharedFloors
+    private static readonly IStaticCodeBook[] Floor128X4Books =
     {
-        private static readonly IStaticCodeBook[] Floor128X4Books =
-        {
             new Line128X4Class0(),
             new Line128X4Sub0(),
             new Line128X4Sub1(),
@@ -13,8 +13,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line128X4Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor256X4Books =
-        {
+    private static readonly IStaticCodeBook[] Floor256X4Books =
+    {
             new Line256X4Class0(),
             new Line256X4Sub0(),
             new Line256X4Sub1(),
@@ -22,8 +22,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line256X4Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor128X7Books =
-        {
+    private static readonly IStaticCodeBook[] Floor128X7Books =
+    {
             new Line128X7Class0(),
             new Line128X7Class1(),
             new Line128X7_0Sub1(),
@@ -34,8 +34,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line128X7_1Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor256X7Books =
-        {
+    private static readonly IStaticCodeBook[] Floor256X7Books =
+    {
             new Line256X7Class0(),
             new Line256X7Class1(),
             new Line256X7_0Sub1(),
@@ -46,8 +46,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line256X7_1Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor128X11Books =
-        {
+    private static readonly IStaticCodeBook[] Floor128X11Books =
+    {
             new Line128X11Class1(),
             new Line128X11Class2(),
             new Line128X11Class3(),
@@ -62,8 +62,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line128X11_3Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor128X17Books =
-        {
+    private static readonly IStaticCodeBook[] Floor128X17Books =
+    {
             new Line128X17Class1(),
             new Line128X17Class2(),
             new Line128X17Class3(),
@@ -78,8 +78,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line128X17_3Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor256X4LowBooks =
-        {
+    private static readonly IStaticCodeBook[] Floor256X4LowBooks =
+    {
             new Line256X4LowClass0(),
             new Line256X4LowSub0(),
             new Line256X4LowSub1(),
@@ -87,8 +87,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line256X4LowSub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor1024X27Books =
-        {
+    private static readonly IStaticCodeBook[] Floor1024X27Books =
+    {
             new Line1024X27Class1(),
             new Line1024X27Class2(),
             new Line1024X27Class3(),
@@ -106,8 +106,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line1024X27_4Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor2048X27Books =
-        {
+    private static readonly IStaticCodeBook[] Floor2048X27Books =
+    {
             new Line2048X27Class1(),
             new Line2048X27Class2(),
             new Line2048X27Class3(),
@@ -125,8 +125,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line2048X27_4Sub3()
         };
 
-        private static readonly IStaticCodeBook[] Floor512X17Books =
-        {
+    private static readonly IStaticCodeBook[] Floor512X17Books =
+    {
             new Line512X17Class1(),
             new Line512X17Class2(),
             new Line512X17Class3(),
@@ -141,8 +141,8 @@ namespace OggVorbisEncoder.Setup.Templates
             new Line512X17_3Sub3()
         };
 
-        public static readonly IStaticCodeBook[][] FloorBooks =
-        {
+    public static readonly IStaticCodeBook[][] FloorBooks =
+    {
             Floor128X4Books,
             Floor256X4Books,
             Floor128X7Books,
@@ -155,8 +155,8 @@ namespace OggVorbisEncoder.Setup.Templates
             Floor512X17Books
         };
 
-        public static readonly Floor[] Floor =
-        {
+    public static readonly Floor[] Floor =
+    {
             /* 0: 128 x 4 */
             new Floor(new[] {0}, new[] {4}, new[] {2}, new[] {0},
                 new[] {new[] {1, 2, 3, 4}},
@@ -237,5 +237,4 @@ namespace OggVorbisEncoder.Setup.Templates
                 60, 30, 500, 1, 18, 10
             )
         };
-    }
 }

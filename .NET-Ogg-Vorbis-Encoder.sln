@@ -1,12 +1,17 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder", "OggVorbisEncoder\OggVorbisEncoder.csproj", "{60268B75-5C47-4DFC-9F7A-83E47B0978CD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder.Example", "OggVorbisEncoder.Example\OggVorbisEncoder.Example.csproj", "{B96A2BFE-6829-4E5A-86BE-26DE0294D3C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder.Benchmarks", "OggVorbisEncoder.Benchmarks\OggVorbisEncoder.Benchmarks.csproj", "{8151113A-24BC-4A67-B513-D43C912AE0C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4D83A998-952C-4B8D-8EB3-2AD3764890C7}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OggVorbisEncoder.StreamExample", "OggVorbisEncoder.StreamExample\OggVorbisEncoder.StreamExample.csproj", "{22589CA2-5F8B-44F8-BC87-795569486E28}"
 EndProject

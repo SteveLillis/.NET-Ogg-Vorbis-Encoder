@@ -1,7 +1,6 @@
-﻿namespace OggVorbisEncoder.Setup
+﻿namespace OggVorbisEncoder.Setup;
+
+public interface IStaticBookBlock
 {
-    public interface IStaticBookBlock
-    {
-        IStaticCodeBook[][] Books { get; }
-    }
+    IStaticCodeBook[][] Books { get; }
 }

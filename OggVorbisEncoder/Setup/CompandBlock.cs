@@ -1,12 +1,11 @@
-﻿namespace OggVorbisEncoder.Setup
-{
-    public class CompandBlock
-    {
-        public CompandBlock(int[] data)
-        {
-            Data = data;
-        }
+﻿namespace OggVorbisEncoder.Setup;
 
-        public int[] Data { get; }
+public class CompandBlock
+{
+    public CompandBlock(int[] data)
+    {
+        Data = data;
     }
+
+    public int[] Data { get; }
 }

@@ -1,9 +1,9 @@
-namespace OggVorbisEncoder
+namespace OggVorbisEncoder;
+
+public static class Block
 {
-    public static class Block
+    private static readonly float[] Win64 =
     {
-        private static readonly float[] Win64 =
-        {
             0.0009460463F, 0.0085006468F, 0.0235352254F, 0.0458950567F,
             0.0753351908F, 0.1115073077F, 0.1539457973F, 0.2020557475F,
             0.2551056759F, 0.3122276645F, 0.3724270287F, 0.4346027792F,
@@ -14,8 +14,8 @@ namespace OggVorbisEncoder
             0.9989462667F, 0.9997230082F, 0.9999638688F, 0.9999995525F
         };
 
-        private static readonly float[] Win128 =
-        {
+    private static readonly float[] Win128 =
+    {
             0.0002365472F, 0.0021280687F, 0.0059065254F, 0.0115626550F,
             0.0190823442F, 0.0284463735F, 0.0396300935F, 0.0526030430F,
             0.0673285281F, 0.0837631763F, 0.1018564887F, 0.1215504095F,
@@ -34,8 +34,8 @@ namespace OggVorbisEncoder
             0.9999331503F, 0.9999825563F, 0.9999977357F, 0.9999999720F
         };
 
-        private static readonly float[] Win256 =
-        {
+    private static readonly float[] Win256 =
+    {
             0.0000591390F, 0.0005321979F, 0.0014780301F, 0.0028960636F,
             0.0047854363F, 0.0071449926F, 0.0099732775F, 0.0132685298F,
             0.0170286741F, 0.0212513119F, 0.0259337111F, 0.0310727950F,
@@ -70,8 +70,8 @@ namespace OggVorbisEncoder
             0.9999958064F, 0.9999989077F, 0.9999998584F, 0.9999999983F
         };
 
-        private static readonly float[] Win512 =
-        {
+    private static readonly float[] Win512 =
+    {
             0.0000147849F, 0.0001330607F, 0.0003695946F, 0.0007243509F,
             0.0011972759F, 0.0017882983F, 0.0024973285F, 0.0033242588F,
             0.0042689632F, 0.0053312973F, 0.0065110982F, 0.0078081841F,
@@ -138,8 +138,8 @@ namespace OggVorbisEncoder
             0.9999997377F, 0.9999999317F, 0.9999999911F, 0.9999999999F
         };
 
-        private static readonly float[] Win1024 =
-        {
+    private static readonly float[] Win1024 =
+    {
             0.0000036962F, 0.0000332659F, 0.0000924041F, 0.0001811086F,
             0.0002993761F, 0.0004472021F, 0.0006245811F, 0.0008315063F,
             0.0010679699F, 0.0013339631F, 0.0016294757F, 0.0019544965F,
@@ -270,8 +270,8 @@ namespace OggVorbisEncoder
             0.9999999836F, 0.9999999957F, 0.9999999994F, 1.0000000000F
         };
 
-        private static readonly float[] Win2038 =
-        {
+    private static readonly float[] Win2038 =
+    {
             0.0000009241F, 0.0000083165F, 0.0000231014F, 0.0000452785F,
             0.0000748476F, 0.0001118085F, 0.0001561608F, 0.0002079041F,
             0.0002670379F, 0.0003335617F, 0.0004074748F, 0.0004887765F,
@@ -530,8 +530,8 @@ namespace OggVorbisEncoder
             0.9999999990F, 0.9999999997F, 1.0000000000F, 1.0000000000F
         };
 
-        private static readonly float[] Win4096 =
-        {
+    private static readonly float[] Win4096 =
+    {
             0.0000002310F, 0.0000020791F, 0.0000057754F, 0.0000113197F,
             0.0000187121F, 0.0000279526F, 0.0000390412F, 0.0000519777F,
             0.0000667623F, 0.0000833949F, 0.0001018753F, 0.0001222036F,
@@ -1046,8 +1046,8 @@ namespace OggVorbisEncoder
             0.9999999999F, 1.0000000000F, 1.0000000000F, 1.0000000000F
         };
 
-        private static readonly float[] Win8192 =
-        {
+    private static readonly float[] Win8192 =
+    {
             0.0000000578F, 0.0000005198F, 0.0000014438F, 0.0000028299F,
             0.0000046780F, 0.0000069882F, 0.0000097604F, 0.0000129945F,
             0.0000166908F, 0.0000208490F, 0.0000254692F, 0.0000305515F,
@@ -2074,8 +2074,8 @@ namespace OggVorbisEncoder
             1.0000000000F, 1.0000000000F, 1.0000000000F, 1.0000000000F
         };
 
-        public static readonly float[][] Windows = new[]
-        {
+    public static readonly float[][] Windows = new[]
+    {
             Win64,
             Win128,
             Win256,
@@ -2085,5 +2085,4 @@ namespace OggVorbisEncoder
             Win4096,
             Win8192
         };
-    }
 }

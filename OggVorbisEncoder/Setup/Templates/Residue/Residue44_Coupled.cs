@@ -16,20 +16,20 @@ using MCN1 = OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.Manage
 using MC0 = OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.ManagedChapter0;
 using MC1 = OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.ManagedChapter1;
 
-namespace OggVorbisEncoder.Setup.Templates.Residue
+namespace OggVorbisEncoder.Setup.Templates.Residue;
+
+internal static partial class Residue44
 {
-    internal static partial class Residue44
+
+    internal static readonly IStaticCodeBook C_HuffmanBookNegOneShort = new CN1.ChapterNeg1Short();
+    internal static readonly IStaticCodeBook C_HuffmanBookNegOneShortManaged = new MCN1.ManagedChapterNeg1Short();
+    internal static readonly IStaticCodeBook C_HuffmanBookNegOneLong = new CN1.ChapterNeg1Long();
+    internal static readonly IStaticCodeBook C_HuffmanBookNegOneLongManaged = new MCN1.ManagedChapterNeg1Long();
+    internal static readonly IStaticBookBlock C_BlockNeg1 = new Blocks.BlockNeg1();
+    internal static readonly IStaticBookBlock C_BlockNeg1Managed = new Blocks.ManagedBlockNeg1();
+
+    internal static readonly IResidueTemplate[] C_ResidueNegative1 =
     {
-
-        internal static readonly IStaticCodeBook C_HuffmanBookNegOneShort = new CN1.ChapterNeg1Short();
-        internal static readonly IStaticCodeBook C_HuffmanBookNegOneShortManaged = new MCN1.ManagedChapterNeg1Short();
-        internal static readonly IStaticCodeBook C_HuffmanBookNegOneLong = new CN1.ChapterNeg1Long();
-        internal static readonly IStaticCodeBook C_HuffmanBookNegOneLongManaged = new MCN1.ManagedChapterNeg1Long();
-        internal static readonly IStaticBookBlock C_BlockNeg1 = new Blocks.BlockNeg1();
-        internal static readonly IStaticBookBlock C_BlockNeg1Managed = new Blocks.ManagedBlockNeg1();
-
-        internal static readonly IResidueTemplate[] C_ResidueNegative1 =
-        {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 32,
@@ -48,15 +48,15 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_BlockNeg1Managed)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook0Short = new C0.Chapter0Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook0ShortManaged = new MC0.ManagedChapter0Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook0Long = new C0.Chapter0Long();
-        internal static readonly IStaticCodeBook C_HuffmanBook0LongManaged = new MC0.ManagedChapter0Long();
-        internal static readonly IStaticBookBlock C_Block0 = new Blocks.Block0();
-        internal static readonly IStaticBookBlock C_Block0Managed = new Blocks.ManagedBlock0();
+    internal static readonly IStaticCodeBook C_HuffmanBook0Short = new C0.Chapter0Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook0ShortManaged = new MC0.ManagedChapter0Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook0Long = new C0.Chapter0Long();
+    internal static readonly IStaticCodeBook C_HuffmanBook0LongManaged = new MC0.ManagedChapter0Long();
+    internal static readonly IStaticBookBlock C_Block0 = new Blocks.Block0();
+    internal static readonly IStaticBookBlock C_Block0Managed = new Blocks.ManagedBlock0();
 
-        internal static readonly IResidueTemplate[] C_Residue0 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue0 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -75,15 +75,15 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block0Managed)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook1Short = new C1.Chapter1Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook1ShortManaged = new MC1.ManagedChapter1Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook1Long = new C1.Chapter1Long();
-        internal static readonly IStaticCodeBook C_HuffmanBook1LongManaged = new MC1.ManagedChapter1Long();
-        internal static readonly IStaticBookBlock C_Block1 = new Blocks.Block1();
-        internal static readonly IStaticBookBlock C_Block1Managed = new Blocks.ManagedBlock1();
+    internal static readonly IStaticCodeBook C_HuffmanBook1Short = new C1.Chapter1Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook1ShortManaged = new MC1.ManagedChapter1Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook1Long = new C1.Chapter1Long();
+    internal static readonly IStaticCodeBook C_HuffmanBook1LongManaged = new MC1.ManagedChapter1Long();
+    internal static readonly IStaticBookBlock C_Block1 = new Blocks.Block1();
+    internal static readonly IStaticBookBlock C_Block1Managed = new Blocks.ManagedBlock1();
 
-        internal static readonly IResidueTemplate[] C_Residue1 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue1 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -102,13 +102,13 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block1Managed)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook2Short = new C2.Chapter2Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook2Long = new C2.Chapter2Long();
-        internal static readonly IStaticBookBlock C_Block2 = new Blocks.Block2();
+    internal static readonly IStaticCodeBook C_HuffmanBook2Short = new C2.Chapter2Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook2Long = new C2.Chapter2Long();
+    internal static readonly IStaticBookBlock C_Block2 = new Blocks.Block2();
 
 
-        internal static readonly IResidueTemplate[] C_Residue2 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue2 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -127,12 +127,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block2)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook3Short = new C3.Chapter3Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook3Long = new C3.Chapter3Long();
-        internal static readonly IStaticBookBlock C_Block3 = new Blocks.Block3();
+    internal static readonly IStaticCodeBook C_HuffmanBook3Short = new C3.Chapter3Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook3Long = new C3.Chapter3Long();
+    internal static readonly IStaticBookBlock C_Block3 = new Blocks.Block3();
 
-        internal static readonly IResidueTemplate[] C_Residue3 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue3 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -151,12 +151,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block3)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook4Short = new C4.Chapter4Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook4Long = new C4.Chapter4Long();
-        internal static readonly IStaticBookBlock C_Block4 = new Blocks.Block4();
+    internal static readonly IStaticCodeBook C_HuffmanBook4Short = new C4.Chapter4Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook4Long = new C4.Chapter4Long();
+    internal static readonly IStaticBookBlock C_Block4 = new Blocks.Block4();
 
-        internal static readonly IResidueTemplate[] C_Residue4 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue4 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -175,12 +175,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block4)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook5Short = new C5.Chapter5Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook5Long = new C5.Chapter5Long();
-        internal static readonly IStaticBookBlock C_Block5 = new Blocks.Block5();
+    internal static readonly IStaticCodeBook C_HuffmanBook5Short = new C5.Chapter5Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook5Long = new C5.Chapter5Long();
+    internal static readonly IStaticBookBlock C_Block5 = new Blocks.Block5();
 
-        internal static readonly IResidueTemplate[] C_Residue5 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue5 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -199,12 +199,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block5)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook6Short = new C6.Chapter6Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook6Long = new C6.Chapter6Long();
-        internal static readonly IStaticBookBlock C_Block6 = new Blocks.Block6();
+    internal static readonly IStaticCodeBook C_HuffmanBook6Short = new C6.Chapter6Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook6Long = new C6.Chapter6Long();
+    internal static readonly IStaticBookBlock C_Block6 = new Blocks.Block6();
 
-        internal static readonly IResidueTemplate[] C_Residue6 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue6 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -223,12 +223,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block6)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook7Short = new C7.Chapter7Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook7Long = new C7.Chapter7Long();
-        internal static readonly IStaticBookBlock C_Block7 = new Blocks.Block7();
+    internal static readonly IStaticCodeBook C_HuffmanBook7Short = new C7.Chapter7Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook7Long = new C7.Chapter7Long();
+    internal static readonly IStaticBookBlock C_Block7 = new Blocks.Block7();
 
-        internal static readonly IResidueTemplate[] C_Residue7 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue7 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -247,12 +247,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block7)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook8Short = new C8.Chapter8Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook8Long = new C8.Chapter8Long();
-        internal static readonly IStaticBookBlock C_Block8 = new Blocks.Block8();
+    internal static readonly IStaticCodeBook C_HuffmanBook8Short = new C8.Chapter8Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook8Long = new C8.Chapter8Long();
+    internal static readonly IStaticBookBlock C_Block8 = new Blocks.Block8();
 
-        internal static readonly IResidueTemplate[] C_Residue8 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue8 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -271,12 +271,12 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block8)
         };
 
-        internal static readonly IStaticCodeBook C_HuffmanBook9Short = new C9.Chapter9Short();
-        internal static readonly IStaticCodeBook C_HuffmanBook9Long = new C9.Chapter9Long();
-        internal static readonly IStaticBookBlock C_Block9 = new Blocks.Block9();
+    internal static readonly IStaticCodeBook C_HuffmanBook9Short = new C9.Chapter9Short();
+    internal static readonly IStaticCodeBook C_HuffmanBook9Long = new C9.Chapter9Long();
+    internal static readonly IStaticBookBlock C_Block9 = new Blocks.Block9();
 
-        internal static readonly IResidueTemplate[] C_Residue9 =
-        {
+    internal static readonly IResidueTemplate[] C_Residue9 =
+    {
             new ResidueTemplate(
                 ResidueType.Two,
                 ResidueLimitType.LowPass, 16,
@@ -295,8 +295,8 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
                 C_Block9)
         };
 
-        public static readonly IMappingTemplate[] MapRes_Coupled =
-        {
+    public static readonly IMappingTemplate[] MapRes_Coupled =
+    {
             new MappingTemplate(Shared.MapNominal_Coupled, C_ResidueNegative1),
             new MappingTemplate(Shared.MapNominal_Coupled, C_Residue0),
             new MappingTemplate(Shared.MapNominal_Coupled, C_Residue1),
@@ -309,5 +309,4 @@ namespace OggVorbisEncoder.Setup.Templates.Residue
             new MappingTemplate(Shared.MapNominal_Coupled, C_Residue8),
             new MappingTemplate(Shared.MapNominal_Coupled, C_Residue9)
         };
-    }
 }

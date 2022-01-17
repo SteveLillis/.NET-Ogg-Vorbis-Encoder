@@ -1,27 +1,27 @@
-﻿namespace OggVorbisEncoder.Setup.Templates
+﻿namespace OggVorbisEncoder.Setup.Templates;
+
+public static class Psy
 {
-    public static class Psy
+    public static readonly int[] AthFloater =
     {
-        public static readonly int[] AthFloater =
-        {
             -100, -100, -100, -100, -100, -100, -105, -105, -105, -105, -110,
             -120
         };
 
-        internal static readonly int[] AthAbs =
-        {
+    internal static readonly int[] AthAbs =
+    {
             -130, -130, -130, -130, -140, -140, -140, -140, -140, -140, -140, -150
         };
 
-        public static readonly double[] CompandShortMapping = {0.5, 1, 1, 1.3, 1.6, 2, 2, 2, 2, 2, 2, 2};
-        public static readonly double[] CompandLongMapping = {3.5, 4, 4, 4.3, 4.6, 5, 5, 5, 5, 5, 5, 5};
+    public static readonly double[] CompandShortMapping = { 0.5, 1, 1, 1.3, 1.6, 2, 2, 2, 2, 2, 2, 2 };
+    public static readonly double[] CompandLongMapping = { 3.5, 4, 4, 4.3, 4.6, 5, 5, 5, 5, 5, 5, 5 };
 
-        public static readonly int[] ToneSuppress = {-20, -20, -20, -20, -20, -24, -30, -40, -40, -45, -45, -45};
-        public static readonly int[] ToneZeroDecibel = {90, 90, 95, 95, 95, 95, 105, 105, 105, 105, 105, 105};
-        public static readonly int[] NoiseSuppress = {-20, -20, -24, -24, -24, -24, -30, -40, -40, -45, -45, -45};
+    public static readonly int[] ToneSuppress = { -20, -20, -20, -20, -20, -24, -30, -40, -40, -45, -45, -45 };
+    public static readonly int[] ToneZeroDecibel = { 90, 90, 95, 95, 95, 95, 105, 105, 105, 105, 105, 105 };
+    public static readonly int[] NoiseSuppress = { -20, -20, -24, -24, -24, -24, -30, -40, -40, -45, -45, -45 };
 
-        public static readonly Noise3[] NoiseBiasImpulse =
-        {
+    public static readonly Noise3[] NoiseBiasImpulse =
+    {
             /*  63     125     250     500      1k      2k      4k      8k     16k*/
             // -1 
             new Noise3(new[]
@@ -109,8 +109,8 @@
             })
         };
 
-        public static readonly Noise3[] NoiseBiasPadding =
-        {
+    public static readonly Noise3[] NoiseBiasPadding =
+    {
             /*  63     125     250     500      1k       2k      4k      8k     16k*/
             // -1 
             new Noise3(new[]
@@ -198,8 +198,8 @@
             })
         };
 
-        public static readonly Noise3[] NoiseBiasTransition =
-        {
+    public static readonly Noise3[] NoiseBiasTransition =
+    {
             //  63     125     250     500      1k       2k      4k      8k     16k
             // -1 
             new Noise3(new[]
@@ -287,8 +287,8 @@
             })
         };
 
-        public static readonly Noise3[] NoiseBiasLongBlock =
-        {
+    public static readonly Noise3[] NoiseBiasLongBlock =
+    {
             // 63     125     250     500      1k       2k      4k      8k     16k
             // -1 
             new Noise3(new[]
@@ -376,29 +376,28 @@
             })
         };
 
-        public static readonly PsyInfo PsyInfoTemplate =
-            new PsyInfo(
-                -1,
-                -140,
-                -140,
-                new[] {0f, 0, 0},
-                0,
-                0,
-                -40,
-                new[] {0f},
-                1,
-                -0,
-                0.5f,
-                0.5f,
-                0,
-                0,
-                0,
-                new[] {new[] {-1f}, new[] {-1f}, new[] {-1f}},
-                new[] {-1f},
-                105f,
-                false,
-                -1,
-                -1,
-                0);
-    }
+    public static readonly PsyInfo PsyInfoTemplate =
+        new PsyInfo(
+            -1,
+            -140,
+            -140,
+            new[] { 0f, 0, 0 },
+            0,
+            0,
+            -40,
+            new[] { 0f },
+            1,
+            -0,
+            0.5f,
+            0.5f,
+            0,
+            0,
+            0,
+            new[] { new[] { -1f }, new[] { -1f }, new[] { -1f } },
+            new[] { -1f },
+            105f,
+            false,
+            -1,
+            -1,
+            0);
 }

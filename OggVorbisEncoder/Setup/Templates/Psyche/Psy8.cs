@@ -1,21 +1,21 @@
-﻿namespace OggVorbisEncoder.Setup.Templates.Psyche
+﻿namespace OggVorbisEncoder.Setup.Templates.Psyche;
+
+class Psy8
 {
-    class Psy8
-    {
-        internal static readonly Att3[] ToneMasterAtt ={
+    internal static readonly Att3[] ToneMasterAtt ={
             new Att3(new int[]{ 32,  25,  12},  0,   0),
             new Att3(new int[]{ 30,  25,  12},  0,   0),
             new Att3(new int[]{ 20,   0, -14},  0,   0)
         };
 
-        internal static readonly AdjBlock[] VpToneMaskAdjOtherBlock ={
+    internal static readonly AdjBlock[] VpToneMaskAdjOtherBlock ={
             new AdjBlock(new int[]{-15,-15,-15,-15,-10,-10, -6, 0, 0, 0, 0,10, 0, 0,99,99,99}),
             new AdjBlock(new int[]{-15,-15,-15,-15,-10,-10, -6, 0, 0, 0, 0,10, 0, 0,99,99,99}),
             new AdjBlock(new int[]{-15,-15,-15,-15,-10,-10, -6, 0, 0, 0, 0, 0, 0, 0,99,99,99})
         };
 
 
-        internal static readonly Noise3[] NoiseBias ={
+    internal static readonly Noise3[] NoiseBias ={
             new Noise3(new int[][]{
                 new int[]{-10,-10,-10,-10, -5, -5, -5,  0,  4,  8,  8,  8, 10, 10, 99, 99, 99},
                 new int []{-10,-10,-10,-10, -5, -5, -5,  0,  0,  4,  4,  4,  4,  4, 99, 99, 99},
@@ -32,7 +32,7 @@
                 new int []{-30,-30,-30,-30,-26,-26,-26,-26,-26,-26,-26,-26,-26,-24, 99, 99, 99}}),
         };
 
-        internal static readonly AdjStereo[] StereoModes ={
+    internal static readonly AdjStereo[] StereoModes ={
             new AdjStereo(
                 new int[]{  4,  4,  4,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3},
                 new int[]{  6,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4},
@@ -52,12 +52,12 @@
                 new float[]{ 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99})
         };
 
-        internal static readonly NoiseGuard[] NoiseGuards ={
+    internal static readonly NoiseGuard[] NoiseGuards ={
             new NoiseGuard(10,10,-1),
             new NoiseGuard(10,10,-1),
         };
 
-        internal static readonly CompandBlock[] Compand ={
+    internal static readonly CompandBlock[] Compand ={
             new CompandBlock(new int[]{
                 0, 1, 2, 3, 4, 5, 6,  7,     /* 7dB */
                 8, 8, 9, 9,10,10,11, 11,     /* 15dB */
@@ -75,19 +75,18 @@
             })
         };
 
-        internal static readonly double[] Lowpass = { 3.0, 4.0, 4.0 };
-        internal static readonly int[] NoiseStart = { 64, 64 };
-        internal static readonly int[] NoisePart = { 8, 8 };
-        internal static readonly int[] AthFloater = { -100, -100, -105 };
-        internal static readonly int[] AthAbs = { -130, -130, -140 };
+    internal static readonly double[] Lowpass = { 3.0, 4.0, 4.0 };
+    internal static readonly int[] NoiseStart = { 64, 64 };
+    internal static readonly int[] NoisePart = { 8, 8 };
+    internal static readonly int[] AthFloater = { -100, -100, -105 };
+    internal static readonly int[] AthAbs = { -130, -130, -140 };
 
-        internal static readonly int[] BlockSize = { 512, 512 };
-        internal static readonly int[] FloorMappingA = { 6, 6 };
-        internal static readonly int[][] FloorMapping = { FloorMappingA };
-        internal static readonly double[] RateMap_Coupled = { 6000.0, 9000.0, 32000.0 };
-        internal static readonly double[] RateMap_Uncoupled = { 8000.0, 14000.0, 42000.0 };
-        internal static readonly double[] QualityMapping = { -0.1, 0.0, 1.0 };
-        internal static readonly double[] CompandMapping = { 0.0, 1.0, 1.0 };
-        internal static readonly double[] GlobalMapping = { 1.0, 2.0, 3.0 };
-    }
+    internal static readonly int[] BlockSize = { 512, 512 };
+    internal static readonly int[] FloorMappingA = { 6, 6 };
+    internal static readonly int[][] FloorMapping = { FloorMappingA };
+    internal static readonly double[] RateMap_Coupled = { 6000.0, 9000.0, 32000.0 };
+    internal static readonly double[] RateMap_Uncoupled = { 8000.0, 14000.0, 42000.0 };
+    internal static readonly double[] QualityMapping = { -0.1, 0.0, 1.0 };
+    internal static readonly double[] CompandMapping = { 0.0, 1.0, 1.0 };
+    internal static readonly double[] GlobalMapping = { 1.0, 2.0, 3.0 };
 }

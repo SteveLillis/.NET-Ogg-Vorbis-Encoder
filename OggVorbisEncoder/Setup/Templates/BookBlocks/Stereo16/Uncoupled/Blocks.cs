@@ -2,13 +2,13 @@
 using U1 = OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled.Chapter1;
 using U2 = OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled.Chapter2;
 
-namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled
+namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled;
+
+class Blocks
 {
-    class Blocks
+    public class Block0 : IStaticBookBlock
     {
-        public class Block0 : IStaticBookBlock
-        {
-            public IStaticCodeBook[][] Books { get; } = {
+        public IStaticCodeBook[][] Books { get; } = {
                 new IStaticCodeBook[] {null},
                 new IStaticCodeBook[] {null, null, new U0.Page1_0()},
                 new IStaticCodeBook[] {null, null, new U0.Page2_0()},
@@ -18,11 +18,11 @@ namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled
                 new IStaticCodeBook[] {new U0.Page6_0(), new U0.Page6_1()},
                 new IStaticCodeBook[] {new U0.Page7_0(), new U0.Page7_1(), new U0.Page7_2()}
             };
-        }
+    }
 
-        public class Block1 : IStaticBookBlock
-        {
-            public IStaticCodeBook[][] Books { get; } = {
+    public class Block1 : IStaticBookBlock
+    {
+        public IStaticCodeBook[][] Books { get; } = {
                 new IStaticCodeBook[] {null},
                 new IStaticCodeBook[] {null, null, new U1.Page1_0()},
                 new IStaticCodeBook[] {null, null, new U1.Page2_0()},
@@ -34,11 +34,11 @@ namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled
                 new IStaticCodeBook[] {new U1.Page8_0(), new U1.Page8_1()},
                 new IStaticCodeBook[] {new U1.Page9_0(), new U1.Page9_1(), new U1.Page9_2()}
             };
-        }
+    }
 
-        public class Block2 : IStaticBookBlock
-        {
-            public IStaticCodeBook[][] Books { get; } = {
+    public class Block2 : IStaticBookBlock
+    {
+        public IStaticCodeBook[][] Books { get; } = {
                 new IStaticCodeBook[] {null},
                 new IStaticCodeBook[] {null, null, new U2.Page1_0()},
                 new IStaticCodeBook[] {null, null, new U2.Page2_0()},
@@ -50,6 +50,5 @@ namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo16.Uncoupled
                 new IStaticCodeBook[] {new U2.Page8_0(), new U2.Page8_1()},
                 new IStaticCodeBook[] {new U2.Page9_0(), new U2.Page9_1(), new U2.Page9_2()}
             };
-        }
     }
 }

@@ -1,22 +1,21 @@
 ﻿using System;
 
-namespace OggVorbisEncoder
+namespace OggVorbisEncoder;
+
+public class OffsetMemory<T>
 {
-    public class OffsetMemory<T>
+    private readonly Memory<T> _memory;
+
+    public OffsetMemory(in Memory<T> memory, int offset)
     {
-        private readonly Memory<T> _memory;
+        _memory = memory;
+        Offset = offset;
+    }
 
-        public OffsetMemory(in Memory<T> memory, int offset)
-        {
-            _memory = memory;
-            Offset = offset;
-        }
+    public int Offset { get; }
 
-        public int Offset { get; }
-
-        public T this[int index]
-        {
-            get { return _memory.Span[index]; }
-        }
+    public T this[int index]
+    {
+        get { return _memory.Span[index]; }
     }
 }

@@ -1,10 +1,10 @@
-namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.Chapter5
-{
-    public class Page9_1 : IStaticCodeBook
-    {
-        public int Dimensions { get; } = 2;
+namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.Chapter5;
 
-        public byte[] LengthList { get; } = {
+public class Page9_1 : IStaticCodeBook
+{
+    public int Dimensions { get; } = 2;
+
+    public byte[] LengthList { get; } = {
          1, 4, 4, 5, 5, 7, 7, 9, 8,10, 9,10,10,11,10,11,
         11, 6, 5, 5, 7, 7, 8, 9,10,10,11,10,12,11,12,11,
         13,12, 6, 5, 5, 7, 7, 9, 9,10,10,11,11,12,12,13,
@@ -26,13 +26,13 @@ namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.Chapter5
         15,
 };
 
-        public CodeBookMapType MapType { get; } = (CodeBookMapType)1;
-        public int QuantMin { get; } = -520814592;
-        public int QuantDelta { get; } = 1620377600;
-        public int Quant { get; } = 5;
-        public int QuantSequenceP { get; } = 0;
+    public CodeBookMapType MapType { get; } = (CodeBookMapType)1;
+    public int QuantMin { get; } = -520814592;
+    public int QuantDelta { get; } = 1620377600;
+    public int Quant { get; } = 5;
+    public int QuantSequenceP { get; } = 0;
 
-        public int[] QuantList { get; } = {
+    public int[] QuantList { get; } = {
         8,
         7,
         9,
@@ -51,5 +51,4 @@ namespace OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.Chapter5
         0,
         16,
 };
-    }
 }

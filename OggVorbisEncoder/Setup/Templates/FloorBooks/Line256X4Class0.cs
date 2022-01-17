@@ -1,10 +1,10 @@
-﻿namespace OggVorbisEncoder.Setup.Templates.FloorBooks
-{
-    public class Line256X4Class0 : IStaticCodeBook
-    {
-        public int Dimensions { get; } = 1;
+﻿namespace OggVorbisEncoder.Setup.Templates.FloorBooks;
 
-        public byte[] LengthList { get; } = {
+public class Line256X4Class0 : IStaticCodeBook
+{
+    public int Dimensions { get; } = 1;
+
+    public byte[] LengthList { get; } = {
             6, 7, 7, 12, 6, 6, 7, 12, 7, 6, 6, 10, 15, 12, 11, 13,
             7, 7, 8, 13, 7, 7, 8, 12, 7, 7, 7, 11, 12, 12, 11, 13,
             10, 9, 9, 11, 9, 9, 9, 10, 10, 8, 8, 12, 14, 12, 12, 14,
@@ -23,11 +23,10 @@
             15, 12, 11, 15, 13, 11, 11, 15, 12, 14, 11, 13, 15, 15, 13, 13
         };
 
-        public CodeBookMapType MapType { get; } = CodeBookMapType.None;
-        public int QuantMin { get; } = 0;
-        public int QuantDelta { get; } = 0;
-        public int Quant { get; } = 0;
-        public int QuantSequenceP { get; } = 0;
-        public int[] QuantList { get; } = null;
-    }
+    public CodeBookMapType MapType { get; } = CodeBookMapType.None;
+    public int QuantMin { get; } = 0;
+    public int QuantDelta { get; } = 0;
+    public int Quant { get; } = 0;
+    public int QuantSequenceP { get; } = 0;
+    public int[] QuantList { get; } = null;
 }

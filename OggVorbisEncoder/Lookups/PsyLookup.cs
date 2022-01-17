@@ -4,1186 +4,1186 @@ using System.Collections.Generic;
 using System.Linq;
 using OggVorbisEncoder.Setup;
 
-namespace OggVorbisEncoder.Lookups
+namespace OggVorbisEncoder.Lookups;
+
+public class PsyLookup
 {
-    public class PsyLookup
+    private readonly float[] _ath;
+    private readonly int[] _bark;
+    private readonly int _eighthOctaveLines;
+    private readonly int _firstOctave;
+    private readonly float _mVal;
+    private readonly int _n;
+    private readonly float[][] _noiseOffset;
+    private readonly int[] _octave;
+    private readonly PsyInfo _psyInfo;
+    private readonly int _shiftOctave;
+    private readonly List<OffsetMemory<float>> _sort;
+
+    private readonly float[][][] _toneCurves;
+    private readonly int _totalOctaveLines;
+
+    public PsyLookup(PsyInfo psyInfo, PsyGlobal globalParam, int n, int sampleRate)
     {
-        private readonly float[] _ath;
-        private readonly int[] _bark;
-        private readonly int _eighthOctaveLines;
-        private readonly int _firstOctave;
-        private readonly float _mVal;
-        private readonly int _n;
-        private readonly float[][] _noiseOffset;
-        private readonly int[] _octave;
-        private readonly PsyInfo _psyInfo;
-        private readonly int _shiftOctave;
-        private readonly List<OffsetMemory<float>> _sort;
+        _psyInfo = psyInfo;
+        _n = n;
+        _ath = new float[n];
+        _octave = new int[n];
+        _bark = new int[n];
+        _sort = new List<OffsetMemory<float>>(32);
 
-        private readonly float[][][] _toneCurves;
-        private readonly int _totalOctaveLines;
+        int lo = -99, hi = 1;
 
-        public PsyLookup(PsyInfo psyInfo, PsyGlobal globalParam, int n, int sampleRate)
+        _eighthOctaveLines = globalParam.EighthOctaveLines;
+        _shiftOctave = (int)Math.Round(Math.Log(globalParam.EighthOctaveLines * 8f) / Math.Log(2)) - 1;
+
+        _firstOctave = (int)(ToOctave(.25f * sampleRate * .5 / n)
+                              * (1 << (_shiftOctave + 1))
+                              - globalParam.EighthOctaveLines);
+
+        var maxOctave = (int)(ToOctave((n + .25f) * sampleRate * .5 / n)
+                               * (1 << (_shiftOctave + 1))
+                               + .5f);
+
+        _totalOctaveLines = maxOctave - _firstOctave + 1;
+
+        // AoTuV HF weighting 
+        _mVal = 1;
+        if (sampleRate < 26000)
+            _mVal = 0;
+        else if (sampleRate < 38000)
+            _mVal = .94f; // 32kHz 
+        else if (sampleRate > 46000)
+            _mVal = 1.275f; // 48kHz
+
+        // set up the lookups for a given blocksize and sample rate
+        int k, j;
+        for (k = 0, j = 0; k < MaxAth - 1; k++)
         {
-            _psyInfo = psyInfo;
-            _n = n;
-            _ath = new float[n];
-            _octave = new int[n];
-            _bark = new int[n];
-            _sort = new List<OffsetMemory<float>>(32);
-
-            int lo = -99, hi = 1;
-
-            _eighthOctaveLines = globalParam.EighthOctaveLines;
-            _shiftOctave = (int) Math.Round(Math.Log(globalParam.EighthOctaveLines*8f)/Math.Log(2)) - 1;
-
-            _firstOctave = (int) (ToOctave(.25f*sampleRate*.5/n)
-                                  *(1 << (_shiftOctave + 1))
-                                  - globalParam.EighthOctaveLines);
-
-            var maxOctave = (int) (ToOctave((n + .25f)*sampleRate*.5/n)
-                                   *(1 << (_shiftOctave + 1))
-                                   + .5f);
-
-            _totalOctaveLines = maxOctave - _firstOctave + 1;
-
-            // AoTuV HF weighting 
-            _mVal = 1;
-            if (sampleRate < 26000)
-                _mVal = 0;
-            else if (sampleRate < 38000)
-                _mVal = .94f; // 32kHz 
-            else if (sampleRate > 46000)
-                _mVal = 1.275f; // 48kHz
-
-            // set up the lookups for a given blocksize and sample rate
-            int k, j;
-            for (k = 0, j = 0; k < MaxAth - 1; k++)
+            var endPos = (int)Math.Round(FromOctave((k + 1) * .125 - 2) * 2.0 * n / sampleRate);
+            var baseAth = AthSource[k];
+            if (j < endPos)
             {
-                var endPos = (int) Math.Round(FromOctave((k + 1)*.125 - 2)*2.0*n/sampleRate);
-                var baseAth = AthSource[k];
-                if (j < endPos)
+                var delta = (AthSource[k + 1] - baseAth) / (endPos - j);
+                for (; (j < endPos) && (j < n); j++)
                 {
-                    var delta = (AthSource[k + 1] - baseAth)/(endPos - j);
-                    for (; (j < endPos) && (j < n); j++)
-                    {
-                        _ath[j] = baseAth + 100;
-                        baseAth += delta;
-                    }
+                    _ath[j] = baseAth + 100;
+                    baseAth += delta;
                 }
-            }
-
-            for (; j < n; j++)
-                _ath[j] = _ath[j - 1];
-
-            for (var i = 0; i < n; i++)
-            {
-                var bark = ToBark(sampleRate/(2*n)*i);
-
-                for (;
-                    (lo + psyInfo.NoiseWindowLowMin < i)
-                    && (ToBark(sampleRate/(2*n)*lo) < bark - psyInfo.NoiseWindowLow);
-                    lo++)
-                {
-                }
-
-                for (;
-                    (hi <= n) && ((hi < i + psyInfo.NoiseWindowHighMin)
-                                  || (ToBark(sampleRate/(2*n)*hi) < bark + psyInfo.NoiseWindowHigh));
-                    hi++)
-                {
-                }
-
-                _bark[i] = ((lo - 1) << 16) + (hi - 1);
-            }
-
-            for (var i = 0; i < n; i++)
-                _octave[i] = (int) (ToOctave((i + .25f)*.5*sampleRate/n)
-                                    *(1 << (_shiftOctave + 1))
-                                    + .5f);
-
-            _toneCurves = SetupToneCurves(
-                psyInfo.ToneAtt,
-                sampleRate*.5/n,
-                n,
-                psyInfo.ToneCenterBoost,
-                psyInfo.ToneDecay);
-
-            /* set up rolling noise median */
-            _noiseOffset = new float[_psyInfo.NoiseOffset.Length][];
-            for (var i = 0; i < _noiseOffset.Length; i++)
-                _noiseOffset[i] = new float[n];
-
-            for (var i = 0; i < n; i++)
-            {
-                var halfOctave = ToOctave((i + .5)*sampleRate/(2.0*n))*2.0;
-
-                if (halfOctave < 0)
-                    halfOctave = 0;
-
-                if (halfOctave >= PsyInfo.Bands - 1)
-                    halfOctave = PsyInfo.Bands - 1;
-
-                var intHalfOctave = (int) halfOctave;
-                var del = halfOctave - intHalfOctave;
-
-                for (var h = 0; h < _noiseOffset.Length; h++)
-                    _noiseOffset[h][i] = (float) (psyInfo.NoiseOffset[h][intHalfOctave]*(1 - del)
-                                                  + (del > 0 ? psyInfo.NoiseOffset[h][intHalfOctave + 1]*del : 0));
             }
         }
 
-        private static float[][][] SetupToneCurves(
-            float[] curveAttDecibels,
-            double binHertz,
-            int n,
-            float centerBoost,
-            float centerDecayRate)
+        for (; j < n; j++)
+            _ath[j] = _ath[j - 1];
+
+        for (var i = 0; i < n; i++)
         {
-            var bruteBuffer = new float[n];
-            var ath = new float[EhmerMax];
-            var workc = new float[PsyInfo.Bands][][];
-            for (var i = 0; i < workc.Length; ++i)
-                workc[i] = new float[Levels][];
+            var bark = ToBark(sampleRate / (2 * n) * i);
 
-            var athc = new float[Levels][];
-            var newToneCurves = new float[PsyInfo.Bands][][];
-
-            for (var i = 0; i < PsyInfo.Bands; i++)
+            for (;
+                (lo + psyInfo.NoiseWindowLowMin < i)
+                && (ToBark(sampleRate / (2 * n) * lo) < bark - psyInfo.NoiseWindowLow);
+                lo++)
             {
-                /* we add back in the AthSource to avoid low level curves falling off to
-                -infinity and unnecessarily cutting off high level curves in the
-                curve limiting (last step). */
-
-                // A half-band's settings must be valid over the whole band, and it's better to mask too little than too much 
-                var athOffset = i*4;
-                for (var j = 0; j < EhmerMax; j++)
-                {
-                    var min = 999f;
-                    for (var k = 0; k < 4; k++)
-                        if (j + k + athOffset < MaxAth)
-                        {
-                            if (min > AthSource[j + k + athOffset])
-                                min = AthSource[j + k + athOffset];
-                        }
-                        else
-                        {
-                            if (min > AthSource[MaxAth - 1])
-                                min = AthSource[MaxAth - 1];
-                        }
-
-                    ath[j] = min;
-                }
-
-                // copy curves into working space, replicate the 50dB curve to 30 and 40, replicate the 100dB curve to 110 
-                for (var j = 0; j < 6; j++)
-                    workc[i][j + 2] = ToneMasks[i][j].ToArray().ToFixedLength(EhmerMax);
-
-                workc[i][0] = ToneMasks[i][0].ToArray().ToFixedLength(EhmerMax);
-                workc[i][1] = ToneMasks[i][0].ToArray().ToFixedLength(EhmerMax);
-
-                /* apply centered curve boost/decay */
-                for (var j = 0; j < Levels; j++)
-                    for (var k = 0; k < EhmerMax; k++)
-                    {
-                        var adj = centerBoost + Math.Abs(EhmerOffset - k)*centerDecayRate;
-
-                        if ((adj < 0) && (centerBoost > 0))
-                            adj = 0;
-
-                        if ((adj > 0) && (centerBoost < 0))
-                            adj = 0;
-
-                        workc[i][j][k] += adj;
-                    }
-
-                /* normalize curves so the driving amplitude is 0dB */
-                /* make temp curves with the AthSource overlayed */
-                for (var j = 0; j < Levels; j++)
-                {
-                    AttenuateCurve(
-                        workc[i][j],
-                        curveAttDecibels[i] + 100f - (j < 2 ? 2 : j)*10f - Level0);
-
-                    athc[j] = ath.ToArray().ToFixedLength(EhmerMax);
-
-                    AttenuateCurve(
-                        athc[j],
-                        100f - j*10f - Level0);
-
-                    MaxCurve(athc[j], workc[i][j]);
-                }
-
-                /* Now limit the louder curves.
-    
-                the idea is this: We don't know what the playback attenuation
-                will be; 0dB SL moves every time the user twiddles the volume
-                knob. So that means we have to use a single 'most pessimal' curve
-                for all masking amplitudes, right?  Wrong.  The *loudest* sound
-                can be in (we assume) a range of ...+100dB] SL.  However, sounds
-                20dB down will be in a range ...+80], 40dB down is from ...+60],
-                etc... */
-
-                for (var j = 1; j < Levels; j++)
-                {
-                    MinCurve(athc[j], athc[j - 1]);
-                    MinCurve(workc[i][j], athc[j]);
-                }
             }
 
-            for (var i = 0; i < PsyInfo.Bands; i++)
+            for (;
+                (hi <= n) && ((hi < i + psyInfo.NoiseWindowHighMin)
+                              || (ToBark(sampleRate / (2 * n) * hi) < bark + psyInfo.NoiseWindowHigh));
+                hi++)
             {
-                newToneCurves[i] = new float[Levels][];
+            }
 
-                /* low frequency curves are measured with greater resolution than
-                the MDCT/FFT will actually give us; we want the curve applied
-                to the tone data to be pessimistic and thus apply the minimum
-                masking possible for a given bin.  That means that a single bin
-                could span more than one octave and that the curve will be a
-                composite of multiple octaves.  It also may mean that a single
-                bin may span > an eighth of an octave and that the eighth
-                octave values may also be composited. */
+            _bark[i] = ((lo - 1) << 16) + (hi - 1);
+        }
 
-                /* which octave curves will we be compositing? */
-                var bin = (int) Math.Floor(FromOctave(i*.5)/binHertz);
-                var lowCurve = (int) Math.Ceiling(ToOctave(bin*binHertz + 1)*2);
-                var highCurve = (int) Math.Floor(ToOctave((bin + 1)*binHertz)*2);
-                if (lowCurve > i) lowCurve = i;
-                if (lowCurve < 0) lowCurve = 0;
-                if (highCurve >= PsyInfo.Bands) highCurve = PsyInfo.Bands - 1;
+        for (var i = 0; i < n; i++)
+            _octave[i] = (int)(ToOctave((i + .25f) * .5 * sampleRate / n)
+                                * (1 << (_shiftOctave + 1))
+                                + .5f);
 
-                for (var m = 0; m < Levels; m++)
+        _toneCurves = SetupToneCurves(
+            psyInfo.ToneAtt,
+            sampleRate * .5 / n,
+            n,
+            psyInfo.ToneCenterBoost,
+            psyInfo.ToneDecay);
+
+        /* set up rolling noise median */
+        _noiseOffset = new float[_psyInfo.NoiseOffset.Length][];
+        for (var i = 0; i < _noiseOffset.Length; i++)
+            _noiseOffset[i] = new float[n];
+
+        for (var i = 0; i < n; i++)
+        {
+            var halfOctave = ToOctave((i + .5) * sampleRate / (2.0 * n)) * 2.0;
+
+            if (halfOctave < 0)
+                halfOctave = 0;
+
+            if (halfOctave >= PsyInfo.Bands - 1)
+                halfOctave = PsyInfo.Bands - 1;
+
+            var intHalfOctave = (int)halfOctave;
+            var del = halfOctave - intHalfOctave;
+
+            for (var h = 0; h < _noiseOffset.Length; h++)
+                _noiseOffset[h][i] = (float)(psyInfo.NoiseOffset[h][intHalfOctave] * (1 - del)
+                                              + (del > 0 ? psyInfo.NoiseOffset[h][intHalfOctave + 1] * del : 0));
+        }
+    }
+
+    private static float[][][] SetupToneCurves(
+        float[] curveAttDecibels,
+        double binHertz,
+        int n,
+        float centerBoost,
+        float centerDecayRate)
+    {
+        var bruteBuffer = new float[n];
+        var ath = new float[EhmerMax];
+        var workc = new float[PsyInfo.Bands][][];
+        for (var i = 0; i < workc.Length; ++i)
+            workc[i] = new float[Levels][];
+
+        var athc = new float[Levels][];
+        var newToneCurves = new float[PsyInfo.Bands][][];
+
+        for (var i = 0; i < PsyInfo.Bands; i++)
+        {
+            /* we add back in the AthSource to avoid low level curves falling off to
+            -infinity and unnecessarily cutting off high level curves in the
+            curve limiting (last step). */
+
+            // A half-band's settings must be valid over the whole band, and it's better to mask too little than too much 
+            var athOffset = i * 4;
+            for (var j = 0; j < EhmerMax; j++)
+            {
+                var min = 999f;
+                for (var k = 0; k < 4; k++)
+                    if (j + k + athOffset < MaxAth)
+                    {
+                        if (min > AthSource[j + k + athOffset])
+                            min = AthSource[j + k + athOffset];
+                    }
+                    else
+                    {
+                        if (min > AthSource[MaxAth - 1])
+                            min = AthSource[MaxAth - 1];
+                    }
+
+                ath[j] = min;
+            }
+
+            // copy curves into working space, replicate the 50dB curve to 30 and 40, replicate the 100dB curve to 110 
+            for (var j = 0; j < 6; j++)
+                workc[i][j + 2] = ToneMasks[i][j].ToArray().ToFixedLength(EhmerMax);
+
+            workc[i][0] = ToneMasks[i][0].ToArray().ToFixedLength(EhmerMax);
+            workc[i][1] = ToneMasks[i][0].ToArray().ToFixedLength(EhmerMax);
+
+            /* apply centered curve boost/decay */
+            for (var j = 0; j < Levels; j++)
+                for (var k = 0; k < EhmerMax; k++)
                 {
-                    newToneCurves[i][m] = new float[EhmerMax + 2];
+                    var adj = centerBoost + Math.Abs(EhmerOffset - k) * centerDecayRate;
 
-                    for (var j = 0; j < n; j++)
-                        bruteBuffer[j] = 999;
+                    if ((adj < 0) && (centerBoost > 0))
+                        adj = 0;
 
-                    // Render the curve into bins, then pull values back into curve. 
-                    // The point is that any inherent subsampling aliasing results in a safe minimum
-                    for (var k = lowCurve; k <= highCurve; k++)
-                    {
-                        var l = 0;
-                        for (var j = 0; j < EhmerMax; j++)
-                        {
-                            var lowBin = (int) (FromOctave(j*.125 + k*.5 - 2.0625)/binHertz);
-                            var highBin = FromOctave(j*.125 + k*.5 - 1.9375)/binHertz + 1;
+                    if ((adj > 0) && (centerBoost < 0))
+                        adj = 0;
 
-                            if (lowBin < 0)
-                                lowBin = 0;
+                    workc[i][j][k] += adj;
+                }
 
-                            if (lowBin > n)
-                                lowBin = n;
+            /* normalize curves so the driving amplitude is 0dB */
+            /* make temp curves with the AthSource overlayed */
+            for (var j = 0; j < Levels; j++)
+            {
+                AttenuateCurve(
+                    workc[i][j],
+                    curveAttDecibels[i] + 100f - (j < 2 ? 2 : j) * 10f - Level0);
 
-                            if (lowBin < l)
-                                l = lowBin;
+                athc[j] = ath.ToArray().ToFixedLength(EhmerMax);
 
-                            if (highBin < 0)
-                                highBin = 0;
+                AttenuateCurve(
+                    athc[j],
+                    100f - j * 10f - Level0);
 
-                            if (highBin > n)
-                                highBin = n;
+                MaxCurve(athc[j], workc[i][j]);
+            }
 
-                            for (; (l < highBin) && (l < n); l++)
-                                if (bruteBuffer[l] > workc[k][m][j])
-                                    bruteBuffer[l] = workc[k][m][j];
-                        }
+            /* Now limit the louder curves.
 
-                        for (; l < n; l++)
-                            if (bruteBuffer[l] > workc[k][m][EhmerMax - 1])
-                                bruteBuffer[l] = workc[k][m][EhmerMax - 1];
-                    }
+            the idea is this: We don't know what the playback attenuation
+            will be; 0dB SL moves every time the user twiddles the volume
+            knob. So that means we have to use a single 'most pessimal' curve
+            for all masking amplitudes, right?  Wrong.  The *loudest* sound
+            can be in (we assume) a range of ...+100dB] SL.  However, sounds
+            20dB down will be in a range ...+80], 40dB down is from ...+60],
+            etc... */
 
-                    if (i + 1 < PsyInfo.Bands)
-                    {
-                        var l = 0;
-                        var k = i + 1;
-                        for (var j = 0; j < EhmerMax; j++)
-                        {
-                            var lowBin = (int) (FromOctave(j*.125 + i*.5 - 2.0625)/binHertz);
-                            var highBin = (int) (FromOctave(j*.125 + i*.5 - 1.9375)/binHertz + 1);
+            for (var j = 1; j < Levels; j++)
+            {
+                MinCurve(athc[j], athc[j - 1]);
+                MinCurve(workc[i][j], athc[j]);
+            }
+        }
 
-                            if (lowBin < 0)
-                                lowBin = 0;
+        for (var i = 0; i < PsyInfo.Bands; i++)
+        {
+            newToneCurves[i] = new float[Levels][];
 
-                            if (lowBin > n)
-                                lowBin = n;
+            /* low frequency curves are measured with greater resolution than
+            the MDCT/FFT will actually give us; we want the curve applied
+            to the tone data to be pessimistic and thus apply the minimum
+            masking possible for a given bin.  That means that a single bin
+            could span more than one octave and that the curve will be a
+            composite of multiple octaves.  It also may mean that a single
+            bin may span > an eighth of an octave and that the eighth
+            octave values may also be composited. */
 
-                            if (lowBin < l)
-                                l = lowBin;
+            /* which octave curves will we be compositing? */
+            var bin = (int)Math.Floor(FromOctave(i * .5) / binHertz);
+            var lowCurve = (int)Math.Ceiling(ToOctave(bin * binHertz + 1) * 2);
+            var highCurve = (int)Math.Floor(ToOctave((bin + 1) * binHertz) * 2);
+            if (lowCurve > i) lowCurve = i;
+            if (lowCurve < 0) lowCurve = 0;
+            if (highCurve >= PsyInfo.Bands) highCurve = PsyInfo.Bands - 1;
 
-                            if (highBin < 0)
-                                highBin = 0;
+            for (var m = 0; m < Levels; m++)
+            {
+                newToneCurves[i][m] = new float[EhmerMax + 2];
 
-                            if (highBin > n)
-                                highBin = n;
+                for (var j = 0; j < n; j++)
+                    bruteBuffer[j] = 999;
 
-                            for (; (l < highBin) && (l < n); l++)
-                                if (bruteBuffer[l] > workc[k][m][j])
-                                    bruteBuffer[l] = workc[k][m][j];
-                        }
-
-                        for (; l < n; l++)
-                            if (bruteBuffer[l] > workc[k][m][EhmerMax - 1])
-                                bruteBuffer[l] = workc[k][m][EhmerMax - 1];
-                    }
-
-
+                // Render the curve into bins, then pull values back into curve. 
+                // The point is that any inherent subsampling aliasing results in a safe minimum
+                for (var k = lowCurve; k <= highCurve; k++)
+                {
+                    var l = 0;
                     for (var j = 0; j < EhmerMax; j++)
                     {
-                        var bufferBin = (int) (FromOctave(j*.125 + i*.5 - 2.0)/binHertz);
-                        if (bufferBin < 0)
-                        {
-                            newToneCurves[i][m][j + 2] = -999;
-                        }
-                        else
-                        {
-                            if (bufferBin >= n)
-                                newToneCurves[i][m][j + 2] = -999;
-                            else
-                                newToneCurves[i][m][j + 2] = bruteBuffer[bufferBin];
-                        }
+                        var lowBin = (int)(FromOctave(j * .125 + k * .5 - 2.0625) / binHertz);
+                        var highBin = FromOctave(j * .125 + k * .5 - 1.9375) / binHertz + 1;
+
+                        if (lowBin < 0)
+                            lowBin = 0;
+
+                        if (lowBin > n)
+                            lowBin = n;
+
+                        if (lowBin < l)
+                            l = lowBin;
+
+                        if (highBin < 0)
+                            highBin = 0;
+
+                        if (highBin > n)
+                            highBin = n;
+
+                        for (; (l < highBin) && (l < n); l++)
+                            if (bruteBuffer[l] > workc[k][m][j])
+                                bruteBuffer[l] = workc[k][m][j];
                     }
 
-                    /* add fenceposts */
-                    int e;
-                    for (e = 0; e < EhmerOffset; e++)
-                        if (newToneCurves[i][m][e + 2] > -200f)
-                            break;
-
-                    newToneCurves[i][m][0] = e;
-
-                    for (e = EhmerMax - 1; e > EhmerOffset + 1; e--)
-                        if (newToneCurves[i][m][e + 2] > -200f)
-                            break;
-
-                    newToneCurves[i][m][1] = e;
+                    for (; l < n; l++)
+                        if (bruteBuffer[l] > workc[k][m][EhmerMax - 1])
+                            bruteBuffer[l] = workc[k][m][EhmerMax - 1];
                 }
-            }
 
-            return newToneCurves;
-        }
-
-        public void ToneMask(
-            float[] pcm,
-            float[] logmask,
-            float globalSpecMax,
-            float localSpecMax)
-        {
-            float[] seedArr = null;
-            Span<float> seed = _totalOctaveLines <= 128
-                ? stackalloc float[_totalOctaveLines]
-                : (seedArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines));
-
-            seed = seed.Slice(0, _totalOctaveLines);
-
-            var att = localSpecMax + _psyInfo.AthAdjAtt;
-
-            for (var i = 0; i < seed.Length; i++)
-                seed[i] = NegativeInfinite;
-
-            // set the ATH (floating below localmax, not global max by a specified att)
-            if (att < _psyInfo.AthMaxAtt)
-                att = _psyInfo.AthMaxAtt;
-
-            for (var i = 0; i < _n; i++)
-                logmask[i] = _ath[i] + att;
-
-            // tone masking 
-            SeedLoop(_toneCurves, pcm, logmask, seed, globalSpecMax);
-            MaxSeeds(seed, logmask);
-
-            if (seedArr != null)
-                ArrayPool<float>.Shared.Return(seedArr);
-        }
-
-        public void OffsetAndMix(
-            float[] noise,
-            float[] tone,
-            int offsetIndex,
-            float[] logmask,
-            float[] mdct,
-            in Span<float> logmdct)
-        {
-            var toneAtt = _psyInfo.ToneMasterAtt[offsetIndex];
-
-            double cx = _mVal;
-
-            for (var i = 0; i < _n; i++)
-            {
-                var val = noise[i] + _noiseOffset[offsetIndex][i];
-
-                if (val > _psyInfo.NoiseMaxSuppress)
-                    val = _psyInfo.NoiseMaxSuppress;
-
-                logmask[i] = Math.Max(val, tone[i] + toneAtt);
-
-                // AoTuV 
-                // @ M1 **
-                //  The following codes improve a noise problem.
-                //  A fundamental idea uses the value of masking and carries out
-                //  the relative compensation of the MDCT.
-                //  However, this code is not perfect and all noise problems cannot be solved.
-                //  by Aoyumi @ 2004/04/18
-
-                if (offsetIndex == 1)
+                if (i + 1 < PsyInfo.Bands)
                 {
-                    double coeffi = -17.2f; // AoTuV
-                    val -= logmdct[i]; // val == mdct line value relative to floor in dB 
-
-                    double de;
-                    if (val > coeffi)
+                    var l = 0;
+                    var k = i + 1;
+                    for (var j = 0; j < EhmerMax; j++)
                     {
-                        // mdct value is > -17.2 dB below floor 
+                        var lowBin = (int)(FromOctave(j * .125 + i * .5 - 2.0625) / binHertz);
+                        var highBin = (int)(FromOctave(j * .125 + i * .5 - 1.9375) / binHertz + 1);
 
-                        de = 1.0 - (val - coeffi)*0.005*cx;
+                        if (lowBin < 0)
+                            lowBin = 0;
 
-                        // pro-rated attenuation:
-                        // -0.00 dB boost if mdct value is -17.2dB (relative to floor)
-                        // -0.77 dB boost if mdct value is 0dB (relative to floor)
-                        // -1.64 dB boost if mdct value is +17.2dB (relative to floor)
-                        // etc... 
-                        if (de < 0)
-                            de = 0.0001f;
+                        if (lowBin > n)
+                            lowBin = n;
+
+                        if (lowBin < l)
+                            l = lowBin;
+
+                        if (highBin < 0)
+                            highBin = 0;
+
+                        if (highBin > n)
+                            highBin = n;
+
+                        for (; (l < highBin) && (l < n); l++)
+                            if (bruteBuffer[l] > workc[k][m][j])
+                                bruteBuffer[l] = workc[k][m][j];
+                    }
+
+                    for (; l < n; l++)
+                        if (bruteBuffer[l] > workc[k][m][EhmerMax - 1])
+                            bruteBuffer[l] = workc[k][m][EhmerMax - 1];
+                }
+
+
+                for (var j = 0; j < EhmerMax; j++)
+                {
+                    var bufferBin = (int)(FromOctave(j * .125 + i * .5 - 2.0) / binHertz);
+                    if (bufferBin < 0)
+                    {
+                        newToneCurves[i][m][j + 2] = -999;
                     }
                     else
                     {
-                        // mdct value is <= -17.2 dB below floor 
-                        de = 1.0 - (val - coeffi)*0.0003*cx;
+                        if (bufferBin >= n)
+                            newToneCurves[i][m][j + 2] = -999;
+                        else
+                            newToneCurves[i][m][j + 2] = bruteBuffer[bufferBin];
                     }
+                }
+
+                /* add fenceposts */
+                int e;
+                for (e = 0; e < EhmerOffset; e++)
+                    if (newToneCurves[i][m][e + 2] > -200f)
+                        break;
+
+                newToneCurves[i][m][0] = e;
+
+                for (e = EhmerMax - 1; e > EhmerOffset + 1; e--)
+                    if (newToneCurves[i][m][e + 2] > -200f)
+                        break;
+
+                newToneCurves[i][m][1] = e;
+            }
+        }
+
+        return newToneCurves;
+    }
+
+    public void ToneMask(
+        float[] pcm,
+        float[] logmask,
+        float globalSpecMax,
+        float localSpecMax)
+    {
+        float[] seedArr = null;
+        Span<float> seed = _totalOctaveLines <= 128
+            ? stackalloc float[_totalOctaveLines]
+            : (seedArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines));
+
+        seed = seed.Slice(0, _totalOctaveLines);
+
+        var att = localSpecMax + _psyInfo.AthAdjAtt;
+
+        for (var i = 0; i < seed.Length; i++)
+            seed[i] = NegativeInfinite;
+
+        // set the ATH (floating below localmax, not global max by a specified att)
+        if (att < _psyInfo.AthMaxAtt)
+            att = _psyInfo.AthMaxAtt;
+
+        for (var i = 0; i < _n; i++)
+            logmask[i] = _ath[i] + att;
+
+        // tone masking 
+        SeedLoop(_toneCurves, pcm, logmask, seed, globalSpecMax);
+        MaxSeeds(seed, logmask);
+
+        if (seedArr != null)
+            ArrayPool<float>.Shared.Return(seedArr);
+    }
+
+    public void OffsetAndMix(
+        float[] noise,
+        float[] tone,
+        int offsetIndex,
+        float[] logmask,
+        float[] mdct,
+        in Span<float> logmdct)
+    {
+        var toneAtt = _psyInfo.ToneMasterAtt[offsetIndex];
+
+        double cx = _mVal;
+
+        for (var i = 0; i < _n; i++)
+        {
+            var val = noise[i] + _noiseOffset[offsetIndex][i];
+
+            if (val > _psyInfo.NoiseMaxSuppress)
+                val = _psyInfo.NoiseMaxSuppress;
+
+            logmask[i] = Math.Max(val, tone[i] + toneAtt);
+
+            // AoTuV 
+            // @ M1 **
+            //  The following codes improve a noise problem.
+            //  A fundamental idea uses the value of masking and carries out
+            //  the relative compensation of the MDCT.
+            //  However, this code is not perfect and all noise problems cannot be solved.
+            //  by Aoyumi @ 2004/04/18
+
+            if (offsetIndex == 1)
+            {
+                double coeffi = -17.2f; // AoTuV
+                val -= logmdct[i]; // val == mdct line value relative to floor in dB 
+
+                double de;
+                if (val > coeffi)
+                {
+                    // mdct value is > -17.2 dB below floor 
+
+                    de = 1.0 - (val - coeffi) * 0.005 * cx;
 
                     // pro-rated attenuation:
-                    //  +0.00 dB atten if mdct value is -17.2dB (relative to floor)
-                    //  +0.45 dB atten if mdct value is -34.4dB (relative to floor)
-                    //  etc... 
-                    mdct[i] *= (float) de;
+                    // -0.00 dB boost if mdct value is -17.2dB (relative to floor)
+                    // -0.77 dB boost if mdct value is 0dB (relative to floor)
+                    // -1.64 dB boost if mdct value is +17.2dB (relative to floor)
+                    // etc... 
+                    if (de < 0)
+                        de = 0.0001f;
                 }
+                else
+                {
+                    // mdct value is <= -17.2 dB below floor 
+                    de = 1.0 - (val - coeffi) * 0.0003 * cx;
+                }
+
+                // pro-rated attenuation:
+                //  +0.00 dB atten if mdct value is -17.2dB (relative to floor)
+                //  +0.45 dB atten if mdct value is -34.4dB (relative to floor)
+                //  etc... 
+                mdct[i] *= (float)de;
             }
         }
+    }
 
-        public void NoiseMask(in Span<float> logmdct, float[] logmask)
+    public void NoiseMask(in Span<float> logmdct, float[] logmask)
+    {
+        var workArr = ArrayPool<float>.Shared.Rent(_n);
+        Span<float> work = new Span<float>(workArr, 0, _n);
+
+        BarkNoiseHybridMp(logmdct, logmask, 140, -1);
+
+        for (var i = 0; i < _n; i++)
+            work[i] = logmdct[i] - logmask[i];
+
+        BarkNoiseHybridMp(work, logmask, 0, _psyInfo.NoiseWindowFixed);
+
+        for (var i = 0; i < _n; i++)
+            work[i] = logmdct[i] - work[i];
+
+        for (var i = 0; i < _n; i++)
         {
-            var workArr = ArrayPool<float>.Shared.Rent(_n);
-            Span<float> work = new Span<float>(workArr, 0, _n);
+            var dB = (int)(logmask[i] + .5);
 
-            BarkNoiseHybridMp(logmdct, logmask, 140, -1);
+            if (dB >= _psyInfo.NoiseCompand.Length)
+                dB = _psyInfo.NoiseCompand.Length - 1;
 
-            for (var i = 0; i < _n; i++)
-                work[i] = logmdct[i] - logmask[i];
+            if (dB < 0)
+                dB = 0;
 
-            BarkNoiseHybridMp(work, logmask, 0, _psyInfo.NoiseWindowFixed);
-
-            for (var i = 0; i < _n; i++)
-                work[i] = logmdct[i] - work[i];
-
-            for (var i = 0; i < _n; i++)
-            {
-                var dB = (int) (logmask[i] + .5);
-
-                if (dB >= _psyInfo.NoiseCompand.Length)
-                    dB = _psyInfo.NoiseCompand.Length - 1;
-
-                if (dB < 0)
-                    dB = 0;
-
-                logmask[i] = work[i] + _psyInfo.NoiseCompand[dB];
-            }
-
-            ArrayPool<float>.Shared.Return(workArr);
+            logmask[i] = work[i] + _psyInfo.NoiseCompand[dB];
         }
 
-        private void BarkNoiseHybridMp(
-            in Span<float> f,
-            float[] noise,
-            float offset,
-            int adjusted)
+        ArrayPool<float>.Shared.Return(workArr);
+    }
+
+    private void BarkNoiseHybridMp(
+        in Span<float> f,
+        float[] noise,
+        float offset,
+        int adjusted)
+    {
+        var arr = ArrayPool<float>.Shared.Rent(_n * 5);
+        Span<float> arrSpan = arr;
+
+        var fp = arrSpan.Slice(0, _n);
+        var fx = arrSpan.Slice(_n, _n);
+        var fxx = arrSpan.Slice(_n * 2, _n);
+        var fy = arrSpan.Slice(_n * 3, _n);
+        var fxy = arrSpan.Slice(_n * 4, _n);
+
+        int i;
+
+        int lo, hi;
+        float r;
+        var a = 0f;
+        var b = 0f;
+        var d = 1f;
+        float x;
+
+        var tn = 0f;
+        var tx = 0f;
+        var txx = 0f;
+        var ty = 0f;
+        var txy = 0f;
+
+        var y = f[0] + offset;
+        if (y < 1f)
+            y = 1f;
+
+        var w = (float)(y * y * .5);
+
+        tn += w;
+        tx += w;
+        ty += w * y;
+
+        fp[0] = tn;
+        fx[0] = tx;
+        fxx[0] = txx;
+        fy[0] = ty;
+        fxy[0] = txy;
+
+        for (i = 1, x = 1f; i < _n; i++, x += 1f)
         {
-            var arr = ArrayPool<float>.Shared.Rent(_n*5);
-            Span<float> arrSpan = arr;
+            y = f[i] + offset;
+            if (y < 1f) y = 1f;
 
-            var fp = arrSpan.Slice(0, _n);
-            var fx = arrSpan.Slice(_n, _n);
-            var fxx = arrSpan.Slice(_n*2, _n);
-            var fy = arrSpan.Slice(_n*3, _n);
-            var fxy = arrSpan.Slice(_n*4, _n);
-
-            int i;
-
-            int lo, hi;
-            float r;
-            var a = 0f;
-            var b = 0f;
-            var d = 1f;
-            float x;
-
-            var tn = 0f;
-            var tx = 0f;
-            var txx = 0f;
-            var ty = 0f;
-            var txy = 0f;
-
-            var y = f[0] + offset;
-            if (y < 1f)
-                y = 1f;
-
-            var w = (float) (y*y*.5);
+            w = y * y;
 
             tn += w;
-            tx += w;
-            ty += w*y;
+            tx += w * x;
+            txx += w * x * x;
+            ty += w * y;
+            txy += w * x * y;
 
-            fp[0] = tn;
-            fx[0] = tx;
-            fxx[0] = txx;
-            fy[0] = ty;
-            fxy[0] = txy;
-
-            for (i = 1, x = 1f; i < _n; i++, x += 1f)
-            {
-                y = f[i] + offset;
-                if (y < 1f) y = 1f;
-
-                w = y*y;
-
-                tn += w;
-                tx += w*x;
-                txx += w*x*x;
-                ty += w*y;
-                txy += w*x*y;
-
-                fp[i] = tn;
-                fx[i] = tx;
-                fxx[i] = txx;
-                fy[i] = ty;
-                fxy[i] = txy;
-            }
-
-            for (i = 0, x = 0f;; i++, x += 1f)
-            {
-                lo = _bark[i] >> 16;
-                if (lo >= 0)
-                    break;
-
-                hi = _bark[i] & 0xffff;
-
-                tn = fp[hi] + fp[-lo];
-                tx = fx[hi] - fx[-lo];
-                txx = fxx[hi] + fxx[-lo];
-                ty = fy[hi] + fy[-lo];
-                txy = fxy[hi] - fxy[-lo];
-
-                a = ty*txx - tx*txy;
-                b = tn*txy - tx*ty;
-                d = tn*txx - tx*tx;
-                r = (a + x*b)/d;
-                if (r < 0f)
-                    r = 0f;
-
-                noise[i] = r - offset;
-            }
-
-            for (;; i++, x += 1f)
-            {
-                lo = _bark[i] >> 16;
-                hi = _bark[i] & 0xffff;
-                if (hi >= _n)
-                    break;
-
-                tn = fp[hi] - fp[lo];
-                tx = fx[hi] - fx[lo];
-                txx = fxx[hi] - fxx[lo];
-                ty = fy[hi] - fy[lo];
-                txy = fxy[hi] - fxy[lo];
-
-                a = ty*txx - tx*txy;
-                b = tn*txy - tx*ty;
-                d = tn*txx - tx*tx;
-                r = (a + x*b)/d;
-                if (r < 0f) r = 0f;
-
-                noise[i] = r - offset;
-            }
-            for (; i < _n; i++, x += 1f)
-            {
-                r = (a + x*b)/d;
-                if (r < 0f) r = 0f;
-
-                noise[i] = r - offset;
-            }
-
-            if (adjusted <= 0) return;
-
-            for (i = 0, x = 0f;; i++, x += 1f)
-            {
-                hi = i + adjusted/2;
-                lo = hi - adjusted;
-                if (lo >= 0) break;
-
-                tn = fp[hi] + fp[-lo];
-                tx = fx[hi] - fx[-lo];
-                txx = fxx[hi] + fxx[-lo];
-                ty = fy[hi] + fy[-lo];
-                txy = fxy[hi] - fxy[-lo];
-
-
-                a = ty*txx - tx*txy;
-                b = tn*txy - tx*ty;
-                d = tn*txx - tx*tx;
-                r = (a + x*b)/d;
-
-                if (r - offset < noise[i]) noise[i] = r - offset;
-            }
-            for (;; i++, x += 1f)
-            {
-                hi = i + adjusted/2;
-                lo = hi - adjusted;
-                if (hi >= _n) break;
-
-                tn = fp[hi] - fp[lo];
-                tx = fx[hi] - fx[lo];
-                txx = fxx[hi] - fxx[lo];
-                ty = fy[hi] - fy[lo];
-                txy = fxy[hi] - fxy[lo];
-
-                a = ty*txx - tx*txy;
-                b = tn*txy - tx*ty;
-                d = tn*txx - tx*tx;
-                r = (a + x*b)/d;
-
-                if (r - offset < noise[i]) noise[i] = r - offset;
-            }
-            for (; i < _n; i++, x += 1f)
-            {
-                r = (a + x*b)/d;
-                if (r - offset < noise[i]) noise[i] = r - offset;
-            }
-
-            ArrayPool<float>.Shared.Return(arr);
+            fp[i] = tn;
+            fx[i] = tx;
+            fxx[i] = txx;
+            fy[i] = ty;
+            fxy[i] = txy;
         }
 
-        public void CoupleQuantizeNormalize(
-            int blobno,
-            PsyGlobal psyGlobal,
-            Mapping mapping,
-            float[][] mdct,
-            int[][] iwork,
-            bool[] nonzero,
-            int slidingLowpass,
-            int channels)
+        for (i = 0, x = 0f; ; i++, x += 1f)
         {
-            var partition = _psyInfo.Normalize ? _psyInfo.NormalPartition : 1;
-            var limit = psyGlobal.CouplingPointLimit[_psyInfo.BlockFlag][blobno];
-            var prepoint = StereoThresholds[psyGlobal.CouplingPrePointAmp[blobno]];
-            var postpoint = StereoThresholds[psyGlobal.CouplingPostPointAmp[blobno]];
+            lo = _bark[i] >> 16;
+            if (lo >= 0)
+                break;
 
-            // non-zero flag working vector 
-            Span<bool> nz = stackalloc bool[channels];
+            hi = _bark[i] & 0xffff;
 
-            // energy surplus/deficit tracking 
-            Span<float> acc = stackalloc float[channels + mapping.CouplingSteps];
+            tn = fp[hi] + fp[-lo];
+            tx = fx[hi] - fx[-lo];
+            txx = fxx[hi] + fxx[-lo];
+            ty = fy[hi] + fy[-lo];
+            txy = fxy[hi] - fxy[-lo];
 
-            // The threshold of a stereo is changed with the size of n 
-            if (_n > 1000)
-                postpoint = StereoThresholdsLimit[psyGlobal.CouplingPostPointAmp[blobno]];
+            a = ty * txx - tx * txy;
+            b = tn * txy - tx * ty;
+            d = tn * txx - tx * tx;
+            r = (a + x * b) / d;
+            if (r < 0f)
+                r = 0f;
 
-            // mdct is our raw mdct output, floor not removed. 
-            // inout passes in the ifloor, passes back quantized result 
+            noise[i] = r - offset;
+        }
 
-            var arr = ArrayPool<float>.Shared.Rent(channels*partition*3);
+        for (; ; i++, x += 1f)
+        {
+            lo = _bark[i] >> 16;
+            hi = _bark[i] & 0xffff;
+            if (hi >= _n)
+                break;
 
-            // unquantized energy (negative indicates amplitude has negative sign) 
-            var raw = arr.AsSpan(0, channels*partition);
+            tn = fp[hi] - fp[lo];
+            tx = fx[hi] - fx[lo];
+            txx = fxx[hi] - fxx[lo];
+            ty = fy[hi] - fy[lo];
+            txy = fxy[hi] - fxy[lo];
 
-            // dual pupose; quantized energy (if flag set), othersize fabs(raw) 
-            var quantMemory = arr.AsMemory(channels*partition, channels*partition);
-            var quant = quantMemory.Span;
+            a = ty * txx - tx * txy;
+            b = tn * txy - tx * ty;
+            d = tn * txx - tx * tx;
+            r = (a + x * b) / d;
+            if (r < 0f) r = 0f;
 
-            // floor energy 
-            var floor = arr.AsSpan(channels*partition*2, channels*partition);
+            noise[i] = r - offset;
+        }
+        for (; i < _n; i++, x += 1f)
+        {
+            r = (a + x * b) / d;
+            if (r < 0f) r = 0f;
 
-            // flags indicating raw/quantized status of elements in raw vector 
-            var flagArr = ArrayPool<bool>.Shared.Rent(channels*partition);
-            Span<bool> flag = flagArr.AsSpan(0, channels*partition);
+            noise[i] = r - offset;
+        }
 
-            for (var i = 0; i < channels + mapping.CouplingSteps; i++)
-                acc[i] = 0f;
+        if (adjusted <= 0) return;
 
-            for (var i = 0; i < _n; i += partition)
+        for (i = 0, x = 0f; ; i++, x += 1f)
+        {
+            hi = i + adjusted / 2;
+            lo = hi - adjusted;
+            if (lo >= 0) break;
+
+            tn = fp[hi] + fp[-lo];
+            tx = fx[hi] - fx[-lo];
+            txx = fxx[hi] + fxx[-lo];
+            ty = fy[hi] + fy[-lo];
+            txy = fxy[hi] - fxy[-lo];
+
+
+            a = ty * txx - tx * txy;
+            b = tn * txy - tx * ty;
+            d = tn * txx - tx * tx;
+            r = (a + x * b) / d;
+
+            if (r - offset < noise[i]) noise[i] = r - offset;
+        }
+        for (; ; i++, x += 1f)
+        {
+            hi = i + adjusted / 2;
+            lo = hi - adjusted;
+            if (hi >= _n) break;
+
+            tn = fp[hi] - fp[lo];
+            tx = fx[hi] - fx[lo];
+            txx = fxx[hi] - fxx[lo];
+            ty = fy[hi] - fy[lo];
+            txy = fxy[hi] - fxy[lo];
+
+            a = ty * txx - tx * txy;
+            b = tn * txy - tx * ty;
+            d = tn * txx - tx * tx;
+            r = (a + x * b) / d;
+
+            if (r - offset < noise[i]) noise[i] = r - offset;
+        }
+        for (; i < _n; i++, x += 1f)
+        {
+            r = (a + x * b) / d;
+            if (r - offset < noise[i]) noise[i] = r - offset;
+        }
+
+        ArrayPool<float>.Shared.Return(arr);
+    }
+
+    public void CoupleQuantizeNormalize(
+        int blobno,
+        PsyGlobal psyGlobal,
+        Mapping mapping,
+        float[][] mdct,
+        int[][] iwork,
+        bool[] nonzero,
+        int slidingLowpass,
+        int channels)
+    {
+        var partition = _psyInfo.Normalize ? _psyInfo.NormalPartition : 1;
+        var limit = psyGlobal.CouplingPointLimit[_psyInfo.BlockFlag][blobno];
+        var prepoint = StereoThresholds[psyGlobal.CouplingPrePointAmp[blobno]];
+        var postpoint = StereoThresholds[psyGlobal.CouplingPostPointAmp[blobno]];
+
+        // non-zero flag working vector 
+        Span<bool> nz = stackalloc bool[channels];
+
+        // energy surplus/deficit tracking 
+        Span<float> acc = stackalloc float[channels + mapping.CouplingSteps];
+
+        // The threshold of a stereo is changed with the size of n 
+        if (_n > 1000)
+            postpoint = StereoThresholdsLimit[psyGlobal.CouplingPostPointAmp[blobno]];
+
+        // mdct is our raw mdct output, floor not removed. 
+        // inout passes in the ifloor, passes back quantized result 
+
+        var arr = ArrayPool<float>.Shared.Rent(channels * partition * 3);
+
+        // unquantized energy (negative indicates amplitude has negative sign) 
+        var raw = arr.AsSpan(0, channels * partition);
+
+        // dual pupose; quantized energy (if flag set), othersize fabs(raw) 
+        var quantMemory = arr.AsMemory(channels * partition, channels * partition);
+        var quant = quantMemory.Span;
+
+        // floor energy 
+        var floor = arr.AsSpan(channels * partition * 2, channels * partition);
+
+        // flags indicating raw/quantized status of elements in raw vector 
+        var flagArr = ArrayPool<bool>.Shared.Rent(channels * partition);
+        Span<bool> flag = flagArr.AsSpan(0, channels * partition);
+
+        for (var i = 0; i < channels + mapping.CouplingSteps; i++)
+            acc[i] = 0f;
+
+        for (var i = 0; i < _n; i += partition)
+        {
+            var jn = partition > _n - i ? _n - i : partition;
+            int step, track = 0;
+
+            // prefill 
+            for (var channel = 0; channel < channels; channel++)
             {
-                var jn = partition > _n - i ? _n - i : partition;
-                int step, track = 0;
-
-                // prefill 
-                for (var channel = 0; channel < channels; channel++)
+                nz[channel] = nonzero[channel];
+                if (nz[channel])
                 {
-                    nz[channel] = nonzero[channel];
-                    if (nz[channel])
+                    for (var j = 0; j < jn; j++)
+                        floor[channel * partition + j] = DecibelLookup[iwork[channel][i + j]];
+
+                    FlagLossless(limit, prepoint, postpoint, mdct[channel], floor, flag, channel * partition, i, jn);
+
+                    for (var j = 0; j < jn; j++)
                     {
-                        for (var j = 0; j < jn; j++)
-                            floor[channel*partition + j] = DecibelLookup[iwork[channel][i + j]];
+                        var index = channel * partition + j;
 
-                        FlagLossless(limit, prepoint, postpoint, mdct[channel], floor, flag, channel*partition, i, jn);
+                        quant[index] = raw[index] = mdct[channel][i + j] * mdct[channel][i + j];
 
-                        for (var j = 0; j < jn; j++)
-                        {
-                            var index = channel*partition + j;
+                        if (mdct[channel][i + j] < 0f)
+                            raw[index] *= -1f;
 
-                            quant[index] = raw[index] = mdct[channel][i + j]*mdct[channel][i + j];
-
-                            if (mdct[channel][i + j] < 0f)
-                                raw[index] *= -1f;
-
-                            floor[index] *= floor[channel*partition + j];
-                        }
-
-                        acc[track] = NoiseNormalize(
-                            limit,
-                            raw,
-                            quantMemory,
-                            floor,
-                            null,
-                            channel*partition,
-                            i,
-                            jn,
-                            iwork[channel]);
+                        floor[index] *= floor[channel * partition + j];
                     }
-                    else
-                    {
-                        for (var j = 0; j < jn; j++)
-                        {
-                            var index = channel*partition + j;
-                            floor[index] = 1e-10f;
-                            raw[index] = 0f;
-                            quant[index] = 0f;
-                            flag[index] = false;
-                            iwork[channel][i + j] = 0;
-                        }
 
-                        acc[track] = 0f;
-                    }
-                    track++;
+                    acc[track] = NoiseNormalize(
+                        limit,
+                        raw,
+                        quantMemory,
+                        floor,
+                        null,
+                        channel * partition,
+                        i,
+                        jn,
+                        iwork[channel]);
                 }
-
-                // coupling 
-                for (step = 0; step < mapping.CouplingSteps; step++)
+                else
                 {
-                    var mag = mapping.CouplingMag[step];
-                    var ang = mapping.CouplingAng[step];
-
-                    if (nz[mag] || nz[ang])
+                    for (var j = 0; j < jn; j++)
                     {
-                        nz[mag] = nz[ang] = true;
+                        var index = channel * partition + j;
+                        floor[index] = 1e-10f;
+                        raw[index] = 0f;
+                        quant[index] = 0f;
+                        flag[index] = false;
+                        iwork[channel][i + j] = 0;
+                    }
 
-                        for (var j = 0; j < jn; j++)
-                        {
-                            if (j < slidingLowpass - i)
-                                if (flag[mag*partition + j] || flag[ang*partition + j])
+                    acc[track] = 0f;
+                }
+                track++;
+            }
+
+            // coupling 
+            for (step = 0; step < mapping.CouplingSteps; step++)
+            {
+                var mag = mapping.CouplingMag[step];
+                var ang = mapping.CouplingAng[step];
+
+                if (nz[mag] || nz[ang])
+                {
+                    nz[mag] = nz[ang] = true;
+
+                    for (var j = 0; j < jn; j++)
+                    {
+                        if (j < slidingLowpass - i)
+                            if (flag[mag * partition + j] || flag[ang * partition + j])
+                            {
+                                // lossless coupling 
+                                raw[mag * partition + j] = Math.Abs(raw[mag * partition + j])
+                                                         + Math.Abs(raw[ang * partition + j]);
+
+                                quant[mag * partition + j] = quant[mag * partition + j]
+                                                           + quant[ang * partition + j];
+
+                                flag[mag * partition + j] = flag[ang * partition + j] = true;
+
+                                // couple iM/iA 
                                 {
-                                    // lossless coupling 
-                                    raw[mag*partition + j] = Math.Abs(raw[mag*partition + j])
-                                                             + Math.Abs(raw[ang*partition + j]);
+                                    var a = iwork[mag][i + j];
+                                    var b = iwork[ang][i + j];
 
-                                    quant[mag*partition + j] = quant[mag*partition + j]
-                                                               + quant[ang*partition + j];
-
-                                    flag[mag*partition + j] = flag[ang*partition + j] = true;
-
-                                    // couple iM/iA 
+                                    if (Math.Abs(a) > Math.Abs(b))
                                     {
-                                        var a = iwork[mag][i + j];
-                                        var b = iwork[ang][i + j];
-
-                                        if (Math.Abs(a) > Math.Abs(b))
-                                        {
-                                            iwork[ang][i + j] = a > 0 ? a - b : b - a;
-                                        }
-                                        else
-                                        {
-                                            iwork[ang][i + j] = b > 0 ? a - b : b - a;
-                                            iwork[mag][i + j] = b;
-                                        }
-
-                                        // collapse two equivalent tuples to one 
-                                        if (iwork[ang][i + j] >= Math.Abs(iwork[mag][i + j])*2)
-                                        {
-                                            iwork[ang][i + j] = -iwork[ang][i + j];
-                                            iwork[mag][i + j] = -iwork[mag][i + j];
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    // lossy (point) coupling 
-                                    if (j < limit - i)
-                                    {
-                                        // dipole 
-                                        raw[mag*partition + j] += raw[ang*partition + j];
-                                        quant[mag*partition + j] = Math.Abs(raw[mag*partition + j]);
+                                        iwork[ang][i + j] = a > 0 ? a - b : b - a;
                                     }
                                     else
                                     {
-                                        // elliptical 
-                                        if (raw[mag*partition + j] + raw[ang*partition + j] < 0)
-                                            raw[mag*partition + j] =
-                                                -(quant[mag*partition + j] =
-                                                    Math.Abs(raw[mag*partition + j]) + Math.Abs(raw[ang*partition + j]));
-                                        else
-                                            raw[mag*partition + j] =
-                                                quant[mag*partition + j] =
-                                                    Math.Abs(raw[mag*partition + j]) + Math.Abs(raw[ang*partition + j]);
+                                        iwork[ang][i + j] = b > 0 ? a - b : b - a;
+                                        iwork[mag][i + j] = b;
                                     }
 
-                                    raw[ang*partition + j] = quant[ang*partition + j] = 0f;
-                                    flag[ang*partition + j] = true;
-                                    iwork[ang][i + j] = 0;
+                                    // collapse two equivalent tuples to one 
+                                    if (iwork[ang][i + j] >= Math.Abs(iwork[mag][i + j]) * 2)
+                                    {
+                                        iwork[ang][i + j] = -iwork[ang][i + j];
+                                        iwork[mag][i + j] = -iwork[mag][i + j];
+                                    }
                                 }
-                            floor[mag*partition + j] =
-                                floor[ang*partition + j] = floor[mag*partition + j] + floor[ang*partition + j];
-                        }
+                            }
+                            else
+                            {
+                                // lossy (point) coupling 
+                                if (j < limit - i)
+                                {
+                                    // dipole 
+                                    raw[mag * partition + j] += raw[ang * partition + j];
+                                    quant[mag * partition + j] = Math.Abs(raw[mag * partition + j]);
+                                }
+                                else
+                                {
+                                    // elliptical 
+                                    if (raw[mag * partition + j] + raw[ang * partition + j] < 0)
+                                        raw[mag * partition + j] =
+                                            -(quant[mag * partition + j] =
+                                                Math.Abs(raw[mag * partition + j]) + Math.Abs(raw[ang * partition + j]));
+                                    else
+                                        raw[mag * partition + j] =
+                                            quant[mag * partition + j] =
+                                                Math.Abs(raw[mag * partition + j]) + Math.Abs(raw[ang * partition + j]);
+                                }
 
-                        // normalize the resulting mag vector 
-                        acc[track] = NoiseNormalize(
-                            limit,
-                            raw,
-                            quantMemory,
-                            floor,
-                            flag,
-                            mag,
-                            i,
-                            jn,
-                            iwork[mag]);
-
-                        track++;
+                                raw[ang * partition + j] = quant[ang * partition + j] = 0f;
+                                flag[ang * partition + j] = true;
+                                iwork[ang][i + j] = 0;
+                            }
+                        floor[mag * partition + j] =
+                            floor[ang * partition + j] = floor[mag * partition + j] + floor[ang * partition + j];
                     }
+
+                    // normalize the resulting mag vector 
+                    acc[track] = NoiseNormalize(
+                        limit,
+                        raw,
+                        quantMemory,
+                        floor,
+                        flag,
+                        mag,
+                        i,
+                        jn,
+                        iwork[mag]);
+
+                    track++;
                 }
             }
-
-            ArrayPool<float>.Shared.Return(arr);
-            ArrayPool<bool>.Shared.Return(flagArr);
         }
 
-        private float NoiseNormalize(
-            int limit,
-            in Span<float> r,
-            in Memory<float> qMemory,
-            in Span<float> f,
-            in Span<bool> flags,
-            int offset,
-            int i,
-            int n,
-            int[] output)
+        ArrayPool<float>.Shared.Return(arr);
+        ArrayPool<bool>.Shared.Return(flagArr);
+    }
+
+    private float NoiseNormalize(
+        int limit,
+        in Span<float> r,
+        in Memory<float> qMemory,
+        in Span<float> f,
+        in Span<bool> flags,
+        int offset,
+        int i,
+        int n,
+        int[] output)
+    {
+        _sort.Clear();
+
+        var q = qMemory.Span;
+
+        int j;
+        var start = _psyInfo.Normalize ? _psyInfo.NormalStart - i : n;
+        if (start > n)
+            start = n;
+
+        // force classic behavior where only energy in the current band is considered 
+        var acc = 0f;
+
+        // still responsible for populating *output where noise norm not in
+        // effect.  There's no need to [re]populate *q in these areas 
+        for (j = 0; j < start; j++)
         {
-            _sort.Clear();
+            if ((flags != null) && flags[offset + j])
+                continue;
 
-            var q = qMemory.Span;
+            // Lossless coupling already quantized.
+            // Don't touch; requantizing based on
+            // energy would be incorrect.
+            var ve = q[offset + j] / f[offset + j];
+            if (r[offset + j] < 0)
+                output[i + j] = (int)-Math.Round(Math.Sqrt(ve));
+            else
+                output[i + j] = (int)Math.Round(Math.Sqrt(ve));
+        }
 
-            int j;
-            var start = _psyInfo.Normalize ? _psyInfo.NormalStart - i : n;
-            if (start > n)
-                start = n;
-
-            // force classic behavior where only energy in the current band is considered 
-            var acc = 0f;
-
-            // still responsible for populating *output where noise norm not in
-            // effect.  There's no need to [re]populate *q in these areas 
-            for (j = 0; j < start; j++)
+        // sort magnitudes for noise norm portion of partition 
+        for (; j < n; j++)
+            if ((flags == null) || !flags[offset + j])
             {
-                if ((flags != null) && flags[offset + j])
-                    continue;
+                // can't noise norm elements that have
+                // already been losslessly coupled; we can
+                // only account for their energy error
+                var ve = q[offset + j] / f[offset + j];
 
-                // Lossless coupling already quantized.
-                // Don't touch; requantizing based on
-                // energy would be incorrect.
-                var ve = q[offset + j]/f[offset + j];
-                if (r[offset + j] < 0)
-                    output[i + j] = (int) -Math.Round(Math.Sqrt(ve));
+                // Despite all the new, more capable coupling code, for now we
+                // implement noise norm as it has been up to this point. Only
+                // consider promotions to unit magnitude from 0.  In addition
+                // the only energy error counted is quantizations to zero.
+                // also-- the original point code only applied noise norm at > pointlimit
+                if ((ve < .25f) && ((flags == null) || (j >= limit - i)))
+                {
+                    acc += ve;
+                    _sort.Add(new OffsetMemory<float>(qMemory, j)); // q is fabs(r) for unflagged element
+                }
                 else
-                    output[i + j] = (int) Math.Round(Math.Sqrt(ve));
-            }
-
-            // sort magnitudes for noise norm portion of partition 
-            for (; j < n; j++)
-                if ((flags == null) || !flags[offset + j])
                 {
-                    // can't noise norm elements that have
-                    // already been losslessly coupled; we can
-                    // only account for their energy error
-                    var ve = q[offset + j]/f[offset + j];
-
-                    // Despite all the new, more capable coupling code, for now we
-                    // implement noise norm as it has been up to this point. Only
-                    // consider promotions to unit magnitude from 0.  In addition
-                    // the only energy error counted is quantizations to zero.
-                    // also-- the original point code only applied noise norm at > pointlimit
-                    if ((ve < .25f) && ((flags == null) || (j >= limit - i)))
-                    {
-                        acc += ve;
-                        _sort.Add(new OffsetMemory<float>(qMemory, j)); // q is fabs(r) for unflagged element
-                    }
+                    // For now: no acc adjustment for nonzero quantization.  populate *output and q as this value is final.
+                    if (r[offset + j] < 0)
+                        output[i + j] = (int)-Math.Round(Math.Sqrt(ve));
                     else
-                    {
-                        // For now: no acc adjustment for nonzero quantization.  populate *output and q as this value is final.
-                        if (r[offset + j] < 0)
-                            output[i + j] = (int) -Math.Round(Math.Sqrt(ve));
-                        else
-                            output[i + j] = (int) Math.Round(Math.Sqrt(ve));
+                        output[i + j] = (int)Math.Round(Math.Sqrt(ve));
 
-                        q[offset + j] = output[i + j]*output[i + j]*f[offset + j];
-                    }
+                    q[offset + j] = output[i + j] * output[i + j] * f[offset + j];
                 }
+            }
 
-            if (_sort.Count > 0)
+        if (_sort.Count > 0)
+        {
+            _sort.Sort(Comparer);
+
+            // noise norm to do 
+            for (j = 0; j < _sort.Count; j++)
             {
-                _sort.Sort(Comparer);
-
-                // noise norm to do 
-                for (j = 0; j < _sort.Count; j++)
+                var k = _sort[j].Offset;
+                if (acc >= _psyInfo.NormalThreshold)
                 {
-                    var k = _sort[j].Offset;
-                    if (acc >= _psyInfo.NormalThreshold)
-                    {
-                        output[i + k] = (int) UnitNorm(r[offset + k]);
-                        acc -= 1f;
-                        q[offset + k] = f[offset + k];
-                    }
-                    else
-                    {
-                        output[i + k] = 0;
-                        q[offset + k] = 0f;
-                    }
+                    output[i + k] = (int)UnitNorm(r[offset + k]);
+                    acc -= 1f;
+                    q[offset + k] = f[offset + k];
                 }
-            }
-
-            return acc;
-        }
-
-        private static void FlagLossless(
-            int limit, float prePoint, float postPoint, float[] mdct,
-            in Span<float> floor, in Span<bool> flag, int offset, int i, int jn)
-        {
-            for (var j = 0; j < jn; j++)
-            {
-                var point = j >= limit - i ? postPoint : prePoint;
-                var r = Math.Abs(mdct[j + i])/floor[offset + j];
-                flag[offset + j] = r >= point;
-            }
-        }
-
-        private static float UnitNorm(float x)
-        {
-            var i = BitConverter.ToUInt32(BitConverter.GetBytes(x), 0);
-            i = (i & 0x80000000U) | 0x3f800000U;
-            return BitConverter.ToSingle(BitConverter.GetBytes(i), 0);
-        }
-
-        private void MaxSeeds(in Span<float> seed, float[] floor)
-        {
-            var linePosition = 0;
-
-            SeedChase(seed); // for masking
-
-            var pos = _octave[0] - _firstOctave - (_eighthOctaveLines >> 1);
-
-            float minV;
-            while (linePosition + 1 < _n)
-            {
-                minV = seed[pos];
-                var end = ((_octave[linePosition] + _octave[linePosition + 1]) >> 1) - _firstOctave;
-
-                if (minV > _psyInfo.ToneAbsLimit)
-                    minV = _psyInfo.ToneAbsLimit;
-
-                while (pos + 1 <= end)
+                else
                 {
-                    pos++;
-                    if (((seed[pos] > NegativeInfinite) && (seed[pos] < minV)) || (minV <= NegativeInfinite))
-                        minV = seed[pos];
+                    output[i + k] = 0;
+                    q[offset + k] = 0f;
                 }
+            }
+        }
 
-                end = pos + _firstOctave;
-                for (; (linePosition < _n) && (_octave[linePosition] <= end); linePosition++)
-                    if (floor[linePosition] < minV)
-                        floor[linePosition] = minV;
+        return acc;
+    }
+
+    private static void FlagLossless(
+        int limit, float prePoint, float postPoint, float[] mdct,
+        in Span<float> floor, in Span<bool> flag, int offset, int i, int jn)
+    {
+        for (var j = 0; j < jn; j++)
+        {
+            var point = j >= limit - i ? postPoint : prePoint;
+            var r = Math.Abs(mdct[j + i]) / floor[offset + j];
+            flag[offset + j] = r >= point;
+        }
+    }
+
+    private static float UnitNorm(float x)
+    {
+        var i = BitConverter.ToUInt32(BitConverter.GetBytes(x), 0);
+        i = (i & 0x80000000U) | 0x3f800000U;
+        return BitConverter.ToSingle(BitConverter.GetBytes(i), 0);
+    }
+
+    private void MaxSeeds(in Span<float> seed, float[] floor)
+    {
+        var linePosition = 0;
+
+        SeedChase(seed); // for masking
+
+        var pos = _octave[0] - _firstOctave - (_eighthOctaveLines >> 1);
+
+        float minV;
+        while (linePosition + 1 < _n)
+        {
+            minV = seed[pos];
+            var end = ((_octave[linePosition] + _octave[linePosition + 1]) >> 1) - _firstOctave;
+
+            if (minV > _psyInfo.ToneAbsLimit)
+                minV = _psyInfo.ToneAbsLimit;
+
+            while (pos + 1 <= end)
+            {
+                pos++;
+                if (((seed[pos] > NegativeInfinite) && (seed[pos] < minV)) || (minV <= NegativeInfinite))
+                    minV = seed[pos];
             }
 
-            minV = seed[_totalOctaveLines - 1];
-            for (; linePosition < _n; linePosition++)
+            end = pos + _firstOctave;
+            for (; (linePosition < _n) && (_octave[linePosition] <= end); linePosition++)
                 if (floor[linePosition] < minV)
                     floor[linePosition] = minV;
         }
 
-        private void SeedChase(in Span<float> seeds)
-        {
-            var posStackArr = ArrayPool<int>.Shared.Rent(_totalOctaveLines);
-            var posStack = new Span<int>(posStackArr, 0, _totalOctaveLines);
+        minV = seed[_totalOctaveLines - 1];
+        for (; linePosition < _n; linePosition++)
+            if (floor[linePosition] < minV)
+                floor[linePosition] = minV;
+    }
 
-            var ampStackArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines);
-            var ampStack = new Span<float>(ampStackArr, 0, _totalOctaveLines);
+    private void SeedChase(in Span<float> seeds)
+    {
+        var posStackArr = ArrayPool<int>.Shared.Rent(_totalOctaveLines);
+        var posStack = new Span<int>(posStackArr, 0, _totalOctaveLines);
 
-            var stack = 0;
-            var pos = 0;
+        var ampStackArr = ArrayPool<float>.Shared.Rent(_totalOctaveLines);
+        var ampStack = new Span<float>(ampStackArr, 0, _totalOctaveLines);
 
-            for (var i = 0; i < _totalOctaveLines; i++)
-                if (stack < 2)
-                {
-                    posStack[stack] = i;
-                    ampStack[stack++] = seeds[i];
-                }
-                else
-                {
-                    while (true)
-                        if (seeds[i] < ampStack[stack - 1])
-                        {
-                            posStack[stack] = i;
-                            ampStack[stack++] = seeds[i];
-                            break;
-                        }
-                        else
-                        {
-                            if (i < posStack[stack - 1] + _eighthOctaveLines)
-                                if ((stack > 1) && (ampStack[stack - 1] <= ampStack[stack - 2]) &&
-                                    (i < posStack[stack - 2] + _eighthOctaveLines))
-                                {
-                                    // we completely overlap, making stack-1 irrelevant.  pop it 
-                                    stack--;
-                                    continue;
-                                }
-                            posStack[stack] = i;
-                            ampStack[stack++] = seeds[i];
-                            break;
-                        }
-                }
+        var stack = 0;
+        var pos = 0;
 
-            // the stack now contains only the positions that are relevant. Scan 'em straight through 
-            for (var i = 0; i < stack; i++)
+        for (var i = 0; i < _totalOctaveLines; i++)
+            if (stack < 2)
             {
-                int endPosition;
-                if ((i < stack - 1) && (ampStack[i + 1] > ampStack[i]))
-                    endPosition = posStack[i + 1];
-                else
-                    endPosition = posStack[i] + _eighthOctaveLines + 1;
-
-                if (endPosition > _totalOctaveLines) endPosition = _totalOctaveLines;
-                for (; pos < endPosition; pos++)
-                    seeds[pos] = ampStack[i];
+                posStack[stack] = i;
+                ampStack[stack++] = seeds[i];
+            }
+            else
+            {
+                while (true)
+                    if (seeds[i] < ampStack[stack - 1])
+                    {
+                        posStack[stack] = i;
+                        ampStack[stack++] = seeds[i];
+                        break;
+                    }
+                    else
+                    {
+                        if (i < posStack[stack - 1] + _eighthOctaveLines)
+                            if ((stack > 1) && (ampStack[stack - 1] <= ampStack[stack - 2]) &&
+                                (i < posStack[stack - 2] + _eighthOctaveLines))
+                            {
+                                // we completely overlap, making stack-1 irrelevant.  pop it 
+                                stack--;
+                                continue;
+                            }
+                        posStack[stack] = i;
+                        ampStack[stack++] = seeds[i];
+                        break;
+                    }
             }
 
-            ArrayPool<int>.Shared.Return(posStackArr);
-            ArrayPool<float>.Shared.Return(ampStackArr);
+        // the stack now contains only the positions that are relevant. Scan 'em straight through 
+        for (var i = 0; i < stack; i++)
+        {
+            int endPosition;
+            if ((i < stack - 1) && (ampStack[i + 1] > ampStack[i]))
+                endPosition = posStack[i + 1];
+            else
+                endPosition = posStack[i] + _eighthOctaveLines + 1;
+
+            if (endPosition > _totalOctaveLines) endPosition = _totalOctaveLines;
+            for (; pos < endPosition; pos++)
+                seeds[pos] = ampStack[i];
         }
 
-        private void SeedLoop(float[][][] curves, float[] pcm, float[] floor, in Span<float> seeds, float specmax)
+        ArrayPool<int>.Shared.Return(posStackArr);
+        ArrayPool<float>.Shared.Return(ampStackArr);
+    }
+
+    private void SeedLoop(float[][][] curves, float[] pcm, float[] floor, in Span<float> seeds, float specmax)
+    {
+        // prime the working vector with peak values
+        for (var i = 0; i < _n; i++)
         {
-            // prime the working vector with peak values
-            for (var i = 0; i < _n; i++)
+            var max = pcm[i];
+            var oc = _octave[i];
+            while ((i + 1 < _n) && (_octave[i + 1] == oc))
             {
-                var max = pcm[i];
-                var oc = _octave[i];
-                while ((i + 1 < _n) && (_octave[i + 1] == oc))
-                {
-                    i++;
-                    if (pcm[i] > max)
-                        max = pcm[i];
-                }
+                i++;
+                if (pcm[i] > max)
+                    max = pcm[i];
+            }
 
-                if (max + 6f > floor[i])
-                {
-                    oc >>= _shiftOctave;
+            if (max + 6f > floor[i])
+            {
+                oc >>= _shiftOctave;
 
-                    if (oc >= PsyInfo.Bands)
-                        oc = PsyInfo.Bands - 1;
+                if (oc >= PsyInfo.Bands)
+                    oc = PsyInfo.Bands - 1;
 
-                    if (oc < 0)
-                        oc = 0;
+                if (oc < 0)
+                    oc = 0;
 
-                    SeedCurve(
-                        seeds,
-                        curves[oc],
-                        max,
-                        _octave[i] - _firstOctave,
-                        _totalOctaveLines,
-                        _eighthOctaveLines,
-                        _psyInfo.MaxCurveDecibel - specmax);
-                }
+                SeedCurve(
+                    seeds,
+                    curves[oc],
+                    max,
+                    _octave[i] - _firstOctave,
+                    _totalOctaveLines,
+                    _eighthOctaveLines,
+                    _psyInfo.MaxCurveDecibel - specmax);
             }
         }
+    }
 
-        private static void SeedCurve(in Span<float> seeds, float[][] curves, float amp, int oc, int n, int linesper,
-            float dbOffset)
+    private static void SeedCurve(in Span<float> seeds, float[][] curves, float amp, int oc, int n, int linesper,
+        float dbOffset)
+    {
+        var choice = (int)((amp + dbOffset - Level0) * .1f);
+        choice = Math.Max(choice, 0);
+        choice = Math.Min(choice, Levels - 1);
+        var posts = curves[choice];
+
+        var post1 = (int)posts[1];
+        var seedIndex = (int)(oc + (posts[0] - EhmerOffset) * linesper - (linesper >> 1));
+
+        for (var i = (int)posts[0]; i < post1; i++)
         {
-            var choice = (int) ((amp + dbOffset - Level0)*.1f);
-            choice = Math.Max(choice, 0);
-            choice = Math.Min(choice, Levels - 1);
-            var posts = curves[choice];
-
-            var post1 = (int) posts[1];
-            var seedIndex = (int) (oc + (posts[0] - EhmerOffset)*linesper - (linesper >> 1));
-
-            for (var i = (int) posts[0]; i < post1; i++)
+            if (seedIndex > 0)
             {
-                if (seedIndex > 0)
-                {
-                    var lin = amp + posts[2 + i];
+                var lin = amp + posts[2 + i];
 
-                    if (seeds[seedIndex] < lin)
-                        seeds[seedIndex] = lin;
-                }
-
-                seedIndex += linesper;
-
-                if (seedIndex >= n)
-                    break;
+                if (seeds[seedIndex] < lin)
+                    seeds[seedIndex] = lin;
             }
+
+            seedIndex += linesper;
+
+            if (seedIndex >= n)
+                break;
         }
+    }
 
-        private static void MinCurve(float[] c1, float[] c2)
+    private static void MinCurve(float[] c1, float[] c2)
+    {
+        for (var i = 0; i < EhmerMax; i++)
+            if (c2[i] < c1[i])
+                c1[i] = c2[i];
+    }
+
+    private static void MaxCurve(float[] c1, float[] c2)
+    {
+        for (var i = 0; i < EhmerMax; i++)
+            if (c2[i] > c1[i])
+                c1[i] = c2[i];
+    }
+
+    private static void AttenuateCurve(float[] curve, float att)
+    {
+        for (var i = 0; i < EhmerMax; i++)
+            curve[i] += att;
+    }
+
+    private static double ToOctave(double n) => Math.Log(n) * 1.442695f - 5.965784f;
+
+    private static double FromOctave(double n) => Math.Exp((n + 5.965784f) * .693147f);
+
+    private static double ToBark(double n) => 13.1f * Math.Atan(.00074f * n) + 2.24f * Math.Atan(n * n * 1.85e-8f) + 1e-4f * n;
+
+    private class ApComparer : IComparer<OffsetMemory<float>>
+    {
+        public int Compare(OffsetMemory<float> x, OffsetMemory<float> y)
         {
-            for (var i = 0; i < EhmerMax; i++)
-                if (c2[i] < c1[i])
-                    c1[i] = c2[i];
+            var f1 = x[0];
+            var f2 = y[0];
+            return (f1 < f2 ? 1 : 0)
+                   - (f1 > f2 ? 1 : 0);
         }
+    }
 
-        private static void MaxCurve(float[] c1, float[] c2)
-        {
-            for (var i = 0; i < EhmerMax; i++)
-                if (c2[i] > c1[i])
-                    c1[i] = c2[i];
-        }
+    #region SOURCE DATA
 
-        private static void AttenuateCurve(float[] curve, float att)
-        {
-            for (var i = 0; i < EhmerMax; i++)
-                curve[i] += att;
-        }
+    private static readonly float[] StereoThresholdsLimit = new[]
+        {0, .5f, 1, 1.5f, 2, 2.5f, 4.5f, 8.5f, 9e10f};
 
-        private static double ToOctave(double n) => Math.Log(n)*1.442695f - 5.965784f;
+    private static readonly float[] StereoThresholds = new[]
+        {0, .5f, 1, 1.5f, 2.5f, 4.5f, 8.5f, 16.5f, 9e10f};
 
-        private static double FromOctave(double n) => Math.Exp((n + 5.965784f)*.693147f);
-
-        private static double ToBark(double n) => 13.1f*Math.Atan(.00074f*n) + 2.24f*Math.Atan(n*n*1.85e-8f) + 1e-4f*n;
-
-        private class ApComparer : IComparer<OffsetMemory<float>>
-        {
-            public int Compare(OffsetMemory<float> x, OffsetMemory<float> y)
-            {
-                var f1 = x[0];
-                var f2 = y[0];
-                return (f1 < f2 ? 1 : 0)
-                       - (f1 > f2 ? 1 : 0);
-            }
-        }
-
-        #region SOURCE DATA
-
-        private static readonly float[] StereoThresholdsLimit = new[]
-            {0, .5f, 1, 1.5f, 2, 2.5f, 4.5f, 8.5f, 9e10f};
-
-        private static readonly float[] StereoThresholds = new[]
-            {0, .5f, 1, 1.5f, 2.5f, 4.5f, 8.5f, 16.5f, 9e10f};
-
-        private static readonly float[] DecibelLookup = new[]
-        {
+    private static readonly float[] DecibelLookup = new[]
+    {
             1.0649863e-07f, 1.1341951e-07f, 1.2079015e-07f, 1.2863978e-07f,
             1.3699951e-07f, 1.4590251e-07f, 1.5538408e-07f, 1.6548181e-07f,
             1.7623575e-07f, 1.8768855e-07f, 1.9988561e-07f, 2.128753e-07f,
@@ -1250,17 +1250,17 @@ namespace OggVorbisEncoder.Lookups
             0.82788260f, 0.88168307f, 0.9389798f, 1f
         };
 
-        private static readonly ApComparer Comparer = new ApComparer();
+    private static readonly ApComparer Comparer = new ApComparer();
 
-        private const float NegativeInfinite = -9999f;
-        private const int MaxAth = 88;
-        private const int Levels = 8;
-        private const int Level0 = 30;
-        private const int EhmerMax = 56;
-        private const int EhmerOffset = 16;
+    private const float NegativeInfinite = -9999f;
+    private const int MaxAth = 88;
+    private const int Levels = 8;
+    private const int Level0 = 30;
+    private const int EhmerMax = 56;
+    private const int EhmerOffset = 16;
 
-        private static readonly float[] AthSource =
-        {
+    private static readonly float[] AthSource =
+    {
             /*15*/  -51f, -52, -53, -54, -55, -56, -57, -58,
             /*31*/  -59, -60, -61, -62, -63, -64, -65, -66,
             /*63*/  -67, -68, -69, -70, -71, -72, -73, -74,
@@ -1274,8 +1274,8 @@ namespace OggVorbisEncoder.Lookups
             /*16k*/ -80, -70, -50, -40, -30, -30, -30, -30
         };
 
-        private static readonly float[][][] ToneMasks =
-        {
+    private static readonly float[][][] ToneMasks =
+    {
             /* 62.5 Hz */
             new[]
             {
@@ -2366,6 +2366,5 @@ namespace OggVorbisEncoder.Lookups
             }
         };
 
-        #endregion
-    }
+    #endregion
 }

@@ -1,12 +1,11 @@
-﻿namespace OggVorbisEncoder.Setup
-{
-    public class AdjBlock
-    {
-        public AdjBlock(int[] block)
-        {
-            Block = block;
-        }
+﻿namespace OggVorbisEncoder.Setup;
 
-        public int[] Block { get; }
+public class AdjBlock
+{
+    public AdjBlock(int[] block)
+    {
+        Block = block;
     }
+
+    public int[] Block { get; }
 }

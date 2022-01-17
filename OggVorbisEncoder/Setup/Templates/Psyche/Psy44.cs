@@ -1,14 +1,14 @@
-﻿namespace OggVorbisEncoder.Setup.Templates.Psyche
+﻿namespace OggVorbisEncoder.Setup.Templates.Psyche;
+
+internal static class Psy44
 {
-    internal static class Psy44
+    internal static readonly double[] Lowpass =
     {
-        internal static readonly double[] Lowpass =
-        {
             13.9, 15.1, 15.8, 16.5, 17.2, 18.9, 20.1, 48, 999, 999, 999, 999
         };
 
-        internal static readonly Att3[] ToneMasterAtt =
-        {
+    internal static readonly Att3[] ToneMasterAtt =
+    {
             new Att3(new[] {35, 21, 9}, 0, 0), /* -1 */
             new Att3(new[] {30, 20, 8}, -2, 1.25f), /* 0 */
             new Att3(new[] {25, 12, 2}, 0, 0), /* 1 */
@@ -23,16 +23,16 @@
             new Att3(new[] {12, -2, -20}, 0, 0) /* 10 */
         };
 
-        internal static readonly NoiseGuard[] NoiseGuards =
-        {
+    internal static readonly NoiseGuard[] NoiseGuards =
+    {
             new NoiseGuard(3, 3, 15),
             new NoiseGuard(3, 3, 15),
             new NoiseGuard(10, 10, 100),
             new NoiseGuard(10, 10, 100)
         };
 
-        internal static readonly CompandBlock[] Compand =
-        {
+    internal static readonly CompandBlock[] Compand =
+    {
             /* sub-mode Z short */
             new CompandBlock(new[]
             {
@@ -89,10 +89,10 @@
             })
         };
 
-        internal static readonly double[] GlobalMapping = {0, 1, 1, 1.5, 2, 2, 2.5, 2.7, 3.0, 3.7, 4, 4};
+    internal static readonly double[] GlobalMapping = { 0, 1, 1, 1.5, 2, 2, 2.5, 2.7, 3.0, 3.7, 4, 4 };
 
-        internal static readonly PsyGlobal[] Global =
-        {
+    internal static readonly PsyGlobal[] Global =
+    {
             new PsyGlobal(
                 8,
                 new[] {20f, 14f, 12f, 12f, 12f, 12f, 12},
@@ -151,8 +151,8 @@
             )
         };
 
-        internal static readonly AdjStereo[] StereoModes =
-        {
+    internal static readonly AdjStereo[] StereoModes =
+    {
             /*  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14         -1  */
             new AdjStereo(
                 new[] {4, 4, 4, 4, 4, 4, 4, 3, 2, 2, 1, 0, 0, 0, 0},
@@ -226,46 +226,46 @@
                 new[] {99f, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99})
         };
 
-        internal static readonly double[] RateMap_Coupled =
-        {
+    internal static readonly double[] RateMap_Coupled =
+    {
             22500, 32000, 40000, 48000, 56000, 64000, 80000,
             96000, 112000, 128000, 160000, 250001
         };
 
-        internal static readonly double[] RateMap_Uncoupled =
-        {
+    internal static readonly double[] RateMap_Uncoupled =
+    {
             32000, 48000, 60000, 70000, 80000, 86000,
             96000, 110000, 120000, 140000, 160000, 240001
         };
 
-        internal static readonly double[] QualityMapping = { -.1, .0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0 };
-        internal static readonly int[] BlockSizeShort = { 512, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 };
+    internal static readonly double[] QualityMapping = { -.1, .0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0 };
+    internal static readonly int[] BlockSizeShort = { 512, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 };
 
-        internal static readonly int[] BlockSizeLong =
-        {
+    internal static readonly int[] BlockSizeLong =
+    {
             4096, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048,
             2048
         };
 
-        internal static readonly int[] NoiseStartShort = { 32, 16, 16, 16, 32, 9999, 9999, 9999, 9999, 9999, 9999 };
-        internal static readonly int[] NoiseStartLong = { 256, 128, 128, 256, 512, 9999, 9999, 9999, 9999, 9999, 9999 };
-        internal static readonly int[] NoisePartShort = { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
-        internal static readonly int[] NoisePartLong = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32 };
-        internal static readonly double[] NoiseThresh = { .2, .2, .2, .4, .6, 9999, 9999, 9999, 9999, 9999, 9999 };
-        internal static readonly double[] NoiseThresh5Only = { 0.5, 0.5 };
+    internal static readonly int[] NoiseStartShort = { 32, 16, 16, 16, 32, 9999, 9999, 9999, 9999, 9999, 9999 };
+    internal static readonly int[] NoiseStartLong = { 256, 128, 128, 256, 512, 9999, 9999, 9999, 9999, 9999, 9999 };
+    internal static readonly int[] NoisePartShort = { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
+    internal static readonly int[] NoisePartLong = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32 };
+    internal static readonly double[] NoiseThresh = { .2, .2, .2, .4, .6, 9999, 9999, 9999, 9999, 9999, 9999 };
+    internal static readonly double[] NoiseThresh5Only = { 0.5, 0.5 };
 
-        internal static readonly int[] FloorMappingA = { 1, 0, 0, 2, 2, 4, 5, 5, 5, 5, 5 };
-        internal static readonly int[] FloorMappingB = { 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7 };
-        //internal static readonly int[] FloorMappingC ={10,10,10,10,10,10,10,10,10,10,10};
-        internal static readonly int[][] FloorMapping =
-        {
+    internal static readonly int[] FloorMappingA = { 1, 0, 0, 2, 2, 4, 5, 5, 5, 5, 5 };
+    internal static readonly int[] FloorMappingB = { 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7 };
+    //internal static readonly int[] FloorMappingC ={10,10,10,10,10,10,10,10,10,10,10};
+    internal static readonly int[][] FloorMapping =
+    {
             FloorMappingA,
             FloorMappingB
             //FloorMappingC, 
         };
 
-        internal static readonly AdjBlock[] VpToneMaskAdjLongBlock =
-        {
+    internal static readonly AdjBlock[] VpToneMaskAdjLongBlock =
+    {
             new AdjBlock(new[] {-3, -8, -13, -15, -10, -10, -10, -10, -10, -10, -10, 0, 0, 0, 0, 0, 0}), /* -1 */
             new AdjBlock(new[] {-4, -10, -14, -16, -15, -14, -13, -12, -12, -12, -11, -1, -1, -1, -1, -1, 0}), /* 0 */
             new AdjBlock(new[] {-6, -12, -14, -16, -15, -15, -14, -13, -13, -12, -12, -2, -2, -1, -1, -1, 0}), /* 1 */
@@ -280,8 +280,8 @@
             new AdjBlock(new[] {-16, -16, -16, -16, -16, -16, -16, -15, -14, -14, -14, -12, -9, -4, -2, -2, 0}) /* 10 */
         };
 
-        internal static readonly AdjBlock[] VpToneMaskAdjOtherBlock =
-        {
+    internal static readonly AdjBlock[] VpToneMaskAdjOtherBlock =
+    {
             new AdjBlock(new[] {-3, -8, -13, -15, -10, -10, -9, -9, -9, -9, -9, 1, 1, 1, 1, 1, 1}), /* -1 */
             new AdjBlock(new[] {-4, -10, -14, -16, -14, -13, -12, -12, -11, -11, -10, 0, 0, 0, 0, 0, 0}), /* 0 */
             new AdjBlock(new[] {-6, -12, -14, -16, -15, -15, -14, -13, -13, -12, -12, -2, -2, -1, 0, 0, 0}), /* 1 */
@@ -295,5 +295,4 @@
             new AdjBlock(new[] {-16, -16, -16, -16, -16, -16, -16, -15, -14, -14, -14, -12, -9, -4, -2, -2, 0}), /* 9 */
             new AdjBlock(new[] {-16, -16, -16, -16, -16, -16, -16, -15, -14, -14, -14, -12, -9, -4, -2, -2, 0}) /* 10 */
         };
-    }
 }

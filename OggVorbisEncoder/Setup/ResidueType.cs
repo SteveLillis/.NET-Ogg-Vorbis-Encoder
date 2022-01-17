@@ -1,9 +1,8 @@
-﻿namespace OggVorbisEncoder.Setup
+﻿namespace OggVorbisEncoder.Setup;
+
+public enum ResidueType
 {
-    public enum ResidueType
-    {
-        Zero = 0,
-        One = 1,
-        Two = 2
-    }
+    Zero = 0,
+    One = 1,
+    Two = 2
 }

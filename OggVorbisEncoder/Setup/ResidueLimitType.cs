@@ -1,9 +1,8 @@
-﻿namespace OggVorbisEncoder.Setup
+﻿namespace OggVorbisEncoder.Setup;
+
+public enum ResidueLimitType
 {
-    public enum ResidueLimitType
-    {
-        LowPass = 0,
-        PointStereo = 1,
-        LowFrequencyEffects = 2
-    }
+    LowPass = 0,
+    PointStereo = 1,
+    LowFrequencyEffects = 2
 }

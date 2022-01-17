@@ -1,21 +1,20 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OggVorbisEncoder
+namespace OggVorbisEncoder;
+
+public class Comments
 {
-    public class Comments
+    private readonly List<string> _userComments = new List<string>();
+
+    public List<string> UserComments => _userComments;
+
+    public void AddTag(string tag, string contents)
     {
-        private readonly List<string> _userComments = new List<string>();
-
-        public List<string> UserComments => _userComments;
-
-        public void AddTag(string tag, string contents)
-        {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append(tag);
-            stringBuilder.Append('=');
-            stringBuilder.Append(contents);
-            _userComments.Add(stringBuilder.ToString());
-        }
+        var stringBuilder = new StringBuilder();
+        stringBuilder.Append(tag);
+        stringBuilder.Append('=');
+        stringBuilder.Append(contents);
+        _userComments.Add(stringBuilder.ToString());
     }
 }
