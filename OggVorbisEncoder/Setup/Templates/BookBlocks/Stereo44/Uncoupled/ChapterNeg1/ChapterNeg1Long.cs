@@ -9,7 +9,7 @@ public class ChapterNeg1Long : IStaticCodeBook
         12, 4, 4, 7, 7, 9,11,18, 9, 5, 6, 6, 8, 7, 8,17,
         14, 8, 7, 8, 8,10,12,18, 9, 6, 8, 6, 8, 6, 8,18,
          9, 8,11, 8,11, 7, 5,15,16,18,18,18,17,15,11,18,
-};
+    };
 
     public CodeBookMapType MapType { get; } = (CodeBookMapType)0;
     public int QuantMin { get; } = 0;

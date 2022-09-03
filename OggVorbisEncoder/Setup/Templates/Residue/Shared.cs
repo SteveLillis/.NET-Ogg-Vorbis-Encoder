@@ -8,15 +8,15 @@ internal class Shared
 {
     internal static readonly Mapping[] MapNominal_Coupled =
     {
-            new Mapping(1, new[] {0, 0}, new[] {0}, new[] {0}, 1, new[] {0}, new[] {1}),
-            new Mapping(1, new[] {0, 0}, new[] {1}, new[] {1}, 1, new[] {0}, new[] {1})
-        };
+        new Mapping(1, new[] {0, 0}, new[] {0}, new[] {0}, 1, new[] {0}, new[] {1}),
+        new Mapping(1, new[] {0, 0}, new[] {1}, new[] {1}, 1, new[] {0}, new[] {1})
+    };
 
     internal static readonly Mapping[] MapNominal_Uncoupled =
     {
-            new Mapping(1, new[] {0, 0, 0, 0, 0, 0}, new[] {0}, new[] {0}, 0, new[] {0}, new[] {0}),
-            new Mapping(1, new[] {0, 0, 0, 0, 0, 0}, new[] {1}, new[] {1}, 0, new[] {0}, new[] {0})
-        };
+        new Mapping(1, new[] {0, 0, 0, 0, 0, 0}, new[] {0}, new[] {0}, 0, new[] {0}, new[] {0}),
+        new Mapping(1, new[] {0, 0, 0, 0, 0, 0}, new[] {1}, new[] {1}, 0, new[] {0}, new[] {0})
+    };
 
     internal static readonly ResidueEntry Residue44Low_Coupled = new ResidueEntry(
         0, -1, -1, 9, -1, -1,

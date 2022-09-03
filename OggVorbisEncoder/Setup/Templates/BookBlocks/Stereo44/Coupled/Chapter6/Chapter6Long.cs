@@ -12,7 +12,7 @@ public class Chapter6Long : IStaticCodeBook
          7, 6, 6, 7,11,11,13,11,10, 9, 9, 7, 7, 6,10,11,
         13,13,13,13,13,11, 9, 8,10,12,12,15,15,16,15,12,
         11,10,10,12,
-};
+    };
 
     public CodeBookMapType MapType { get; } = (CodeBookMapType)0;
     public int QuantMin { get; } = 0;

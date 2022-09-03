@@ -11,7 +11,7 @@ public class ManagedChapterNeg1Short : IStaticCodeBook
          6, 5, 6, 9,12,14,12, 6, 7, 8, 6, 7, 9,12,13,14,
          8, 8, 7, 5, 5, 8,10,12,16, 9, 9, 8, 6, 6, 7, 9,
          9,
-};
+    };
 
     public CodeBookMapType MapType { get; } = (CodeBookMapType)0;
     public int QuantMin { get; } = 0;

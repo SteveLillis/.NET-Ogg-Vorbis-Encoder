@@ -45,7 +45,7 @@ public class Page3_0 : IStaticCodeBook
         17,19,19,16,15,16,17,19,11,15,14,16,16,12,15,15,
         19, 0,12,14,15,19,19,14,16,16, 0,18,15,19,14,18,
         16,
-};
+    };
 
     public CodeBookMapType MapType { get; } = (CodeBookMapType)1;
     public int QuantMin { get; } = -533725184;
@@ -59,5 +59,5 @@ public class Page3_0 : IStaticCodeBook
         3,
         0,
         4,
-};
+    };
 }

@@ -5,8 +5,8 @@ public class Line128X7_1Sub1 : IStaticCodeBook
     public int Dimensions { get; } = 1;
 
     public byte[] LengthList { get; } = {
-            0, 3, 3, 2, 3, 3, 4, 3, 4
-        };
+        0, 3, 3, 2, 3, 3, 4, 3, 4
+    };
 
     public CodeBookMapType MapType { get; } = CodeBookMapType.None;
     public int QuantMin { get; } = 0;

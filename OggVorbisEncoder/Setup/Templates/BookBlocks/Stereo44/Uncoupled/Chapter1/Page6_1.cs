@@ -7,7 +7,7 @@ public class Page6_1 : IStaticCodeBook
     public byte[] LengthList { get; } = {
          2, 4, 4, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5,
          6, 6, 6, 6, 5, 6, 6, 6, 6,
-};
+    };
 
     public CodeBookMapType MapType { get; } = (CodeBookMapType)1;
     public int QuantMin { get; } = -533725184;
@@ -21,5 +21,5 @@ public class Page6_1 : IStaticCodeBook
         3,
         0,
         4,
-};
+    };
 }

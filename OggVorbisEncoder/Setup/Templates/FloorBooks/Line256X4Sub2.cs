@@ -5,9 +5,9 @@ public class Line256X4Sub2 : IStaticCodeBook
     public int Dimensions { get; } = 1;
 
     public byte[] LengthList { get; } = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 4, 3, 4, 3,
-            5, 3, 5, 4, 5, 4, 6, 4, 6
-        };
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 4, 3, 4, 3,
+        5, 3, 5, 4, 5, 4, 6, 4, 6
+    };
 
     public CodeBookMapType MapType { get; } = CodeBookMapType.None;
     public int QuantMin { get; } = 0;

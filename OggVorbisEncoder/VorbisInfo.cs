@@ -44,8 +44,7 @@ public class VorbisInfo
             template.BlockSizeShort,
             template.BlockSizeLong);
 
-        var singleBlock = codecSetup.BlockSizes[0]
-                          == codecSetup.BlockSizes[1];
+        var singleBlock = codecSetup.BlockSizes[0] == codecSetup.BlockSizes[1];
 
         // floor setup; choose proper floor params.  Allocated on the floor
         // stack in order; if we alloc only long floor, it's 0 
@@ -727,7 +726,6 @@ public class VorbisInfo
             return -1;
 
         return (int)((template.SampleRateMapping[setting] * (1 - ds)
-                       + template.SampleRateMapping[setting + 1] * ds)
-                      * channels);
+            + template.SampleRateMapping[setting + 1] * ds) * channels);
     }
 }

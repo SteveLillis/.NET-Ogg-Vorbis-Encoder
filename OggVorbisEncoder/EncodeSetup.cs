@@ -11,22 +11,22 @@ public class EncodeSetup
     {
         return new ISetupTemplate[]
         {
-                new Stereo44SetupDataTemplate(),
-                new Uncoupled44SetupDataTemplate(),
-                new Stereo32SetupDataTemplate(),
-                new Uncoupled32SetupDataTemplate(),
-                new Stereo22SetupDataTemplate(),
-                new Uncoupled22SetupDataTemplate(),
-                new Stereo16SetupDataTemplate(),
-                new Uncoupled16SetupDataTemplate(),
-                new Stereo11SetupDataTemplate(),
-                new Uncoupled11SetupDataTemplate(),
-                new Stereo8SetupDataTemplate(),
-                new Uncoupled8SetupDataTemplate(),
-                new StereoXSetupDataTemplate(),
-                new UncoupledXSetupDataTemplate(),
-                new StereoXXSetupDataTemplate(),
-                new UncoupledXXSetupDataTemplate()
+            new Stereo44SetupDataTemplate(),
+            new Uncoupled44SetupDataTemplate(),
+            new Stereo32SetupDataTemplate(),
+            new Uncoupled32SetupDataTemplate(),
+            new Stereo22SetupDataTemplate(),
+            new Uncoupled22SetupDataTemplate(),
+            new Stereo16SetupDataTemplate(),
+            new Uncoupled16SetupDataTemplate(),
+            new Stereo11SetupDataTemplate(),
+            new Uncoupled11SetupDataTemplate(),
+            new Stereo8SetupDataTemplate(),
+            new Uncoupled8SetupDataTemplate(),
+            new StereoXSetupDataTemplate(),
+            new UncoupledXSetupDataTemplate(),
+            new StereoXXSetupDataTemplate(),
+            new UncoupledXXSetupDataTemplate()
         };
     }
 
@@ -41,14 +41,11 @@ public class EncodeSetup
         var iS = (int)BaseSetting;
         var ds = BaseSetting - iS;
 
-        LowPassKilohertz = template.PsyLowPass[iS] * (1 - ds)
-                           + template.PsyLowPass[iS + 1] * ds;
+        LowPassKilohertz = template.PsyLowPass[iS] * (1 - ds) + template.PsyLowPass[iS + 1] * ds;
 
-        AthFloatingDecibel = template.PsyAthFloat[iS] * (1 - ds)
-                             + template.PsyAthFloat[iS + 1] * ds;
+        AthFloatingDecibel = template.PsyAthFloat[iS] * (1 - ds) + template.PsyAthFloat[iS + 1] * ds;
 
-        AthAbsoluteDecibel = template.PsyAthAbs[iS] * (1 - ds)
-                             + template.PsyAthAbs[iS + 1] * ds;
+        AthAbsoluteDecibel = template.PsyAthAbs[iS] * (1 - ds) + template.PsyAthAbs[iS + 1] * ds;
 
         AmplitudeTrackDbPerSec = -6;
 
