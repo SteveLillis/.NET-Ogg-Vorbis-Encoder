@@ -1,11 +1,15 @@
 using System;
 using System.IO;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
 namespace OggVorbisEncoder.Benchmarks;
 
 [MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.NetCoreApp31)]
+[SimpleJob(RuntimeMoniker.Net60)]
+[SimpleJob(RuntimeMoniker.Net70)]
 public class EncoderBenchmarks
 {
     private readonly int WriteBufferSize = 512;
