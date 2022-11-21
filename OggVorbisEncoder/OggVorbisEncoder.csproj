@@ -13,8 +13,11 @@
     <PackageTags>vorbis;ogg;encoder</PackageTags>
     <RepositoryUrl>https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>1.2.1</Version>
-    <PackageReleaseNotes>v1.2.1
+    <Version>1.2.2</Version>
+    <PackageReleaseNotes>v1.2.2
+- Add net7.0 as a target framework
+- Remove net5.0 support
+v1.2.1
 - Add net6.0 as a target framework
 v1.2.0
 - Update target frameworks to netstandard2.0;net461;net5.0
