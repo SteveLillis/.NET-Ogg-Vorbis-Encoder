@@ -264,8 +264,8 @@ public class ResidueLookup
                 int k;
                 for (k = 0; k < _residue.Grouping; k++)
                 {
-                    if (Math.Abs(couples[j][offset + k]) > max) max = Math.Abs(couples[j][offset + k]);
-                    ent += Math.Abs(couples[j][offset + k]);
+                    if (MathExtensions.SafeAbs(couples[j][offset + k]) > max) max = MathExtensions.SafeAbs(couples[j][offset + k]);
+                    ent += MathExtensions.SafeAbs(couples[j][offset + k]);
                 }
                 ent = (int)(ent * (100.0f / _residue.Grouping));
 
@@ -296,13 +296,13 @@ public class ResidueLookup
             var angMax = 0;
             for (var g = 0; g < _residue.Grouping; g += channels)
             {
-                var abs = Math.Abs(couples[0][l]);
+                var abs = MathExtensions.SafeAbs(couples[0][l]);
                 if (abs > magMax)
                     magMax = abs;
 
                 for (var k = 1; k < channels; k++)
                 {
-                    abs = Math.Abs(couples[k][l]);
+                    abs = MathExtensions.SafeAbs(couples[k][l]);
                     if (abs > angMax)
                         angMax = abs;
                 }

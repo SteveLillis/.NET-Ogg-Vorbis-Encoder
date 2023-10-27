@@ -186,7 +186,7 @@ public class PsyLookup
             for (var j = 0; j < Levels; j++)
                 for (var k = 0; k < EhmerMax; k++)
                 {
-                    var adj = centerBoost + Math.Abs(EhmerOffset - k) * centerDecayRate;
+                    var adj = centerBoost + MathExtensions.SafeAbs(EhmerOffset - k) * centerDecayRate;
 
                     if ((adj < 0) && (centerBoost > 0))
                         adj = 0;
