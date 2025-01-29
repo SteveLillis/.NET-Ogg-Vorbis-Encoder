@@ -13,8 +13,11 @@
     <PackageTags>vorbis;ogg;encoder</PackageTags>
     <RepositoryUrl>https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>1.2.2</Version>
-    <PackageReleaseNotes>v1.2.2
+    <Version>1.2.3</Version>
+    <PackageReleaseNotes>v1.2.3
+- Add net9.0 as a target framework
+- Fix exceptions when decoding certain files due to not being able to compute absolute value of the MinValue integer
+v1.2.2
 - Add net7.0 as a target framework
 - Remove net5.0 support
 v1.2.1
