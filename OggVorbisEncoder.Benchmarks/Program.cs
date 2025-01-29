@@ -10,6 +10,7 @@ namespace OggVorbisEncoder.Benchmarks;
 [SimpleJob(RuntimeMoniker.NetCoreApp31)]
 [SimpleJob(RuntimeMoniker.Net60)]
 [SimpleJob(RuntimeMoniker.Net70)]
+[SimpleJob(RuntimeMoniker.Net90)]
 public class EncoderBenchmarks
 {
     private readonly int WriteBufferSize = 512;
