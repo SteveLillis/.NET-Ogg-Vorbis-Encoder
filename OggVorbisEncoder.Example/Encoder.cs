@@ -51,8 +51,6 @@ public class Encoder
         float pcmDuraton = numPcmSamples / (float)pcmSampleRate;
 
         int numOutputSamples = (int)(pcmDuraton * outputSampleRate);
-        //Ensure that samble buffer is aligned to write chunk size
-        numOutputSamples = (numOutputSamples / WriteBufferSize) * WriteBufferSize;
 
         float[][] outSamples = new float[outputChannels][];
 
@@ -93,8 +91,6 @@ public class Encoder
         float[][] outSamples = new float[outputChannels][];
 
         int numOutputSamples = (int)(durationSeconds * outputSampleRate);
-        //Ensure that samble buffer is aligned to write chunk size
-        numOutputSamples = (numOutputSamples / WriteBufferSize) * WriteBufferSize;
 
         for (int ch = 0; ch < outputChannels; ch++)
         {
@@ -149,16 +145,10 @@ public class Encoder
         // =========================================================
         var processingState = ProcessingState.Create(info);
 
-        for (int readIndex = 0; readIndex <= floatSamples[0].Length; readIndex += WriteBufferSize)
+        for (int readIndex = 0; readIndex < floatSamples[0].Length; readIndex += WriteBufferSize)
         {
-            if (readIndex == floatSamples[0].Length)
-            {
-                processingState.WriteEndOfStream();
-            }
-            else
-            {
-                processingState.WriteData(floatSamples, WriteBufferSize, readIndex);
-            }
+            int length = Math.Min(WriteBufferSize, floatSamples[0].Length - readIndex);
+            processingState.WriteData(floatSamples, length, readIndex);
 
             while (!oggStream.Finished && processingState.PacketOut(out OggPacket packet))
             {
@@ -166,6 +156,13 @@ public class Encoder
 
                 FlushPages(oggStream, outputData, false);
             }
+        }
+
+        processingState.WriteEndOfStream();
+        while (!oggStream.Finished && processingState.PacketOut(out OggPacket packet))
+        {
+            oggStream.PacketIn(packet);
+            FlushPages(oggStream, outputData, false);
         }
 
         FlushPages(oggStream, outputData, true);

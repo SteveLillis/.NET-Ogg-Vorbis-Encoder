@@ -27,10 +27,12 @@ public class ProcessingState
     private int _centerWindow;
     private int _currentWindow;
     private int _eofFlag;
+    private int _eofGranulePosition;
     private int _granulePosition;
     private int _lastWindow;
     private int _nextWindow;
     private int _pcmCurrent;
+    private int _totalSamplesWritten;
     private bool _preExtrapolated;
     private int _sequence = 3; // compressed audio packets start after the headers with sequence number 3 
 
@@ -67,6 +69,7 @@ public class ProcessingState
         var vi = _vorbisInfo;
         var ci = vi.CodecSetup;
         _pcmCurrent += length;
+        _totalSamplesWritten += length;
 
         // we may want to reverse extrapolate the beginning of a stream too... in case we're beginning on a cliff! 
         // clumsy, but simple.  It only runs once, so simple is good. 
@@ -91,6 +94,7 @@ public class ProcessingState
         EnsureBufferSize(ci.BlockSizes[1] * 3);
 
         _eofFlag = _pcmCurrent;
+        _eofGranulePosition = _totalSamplesWritten;
         _pcmCurrent += ci.BlockSizes[1] * 3;
 
         for (var channel = 0; channel < _pcm.Length; channel++)
@@ -322,15 +326,19 @@ public class ProcessingState
         // handle eof detection: eof==0 means that we've not yet received EOF eof>0  
         // marks the last 'real' sample in pcm[] eof<0  'no more to do'; doesn't get here 
         var eofFlag = false;
+        var granulePosition = _granulePosition;
         if (_eofFlag != 0)
+        {
             if (_centerWindow >= _eofFlag)
             {
-                _eofFlag = -1;
                 eofFlag = true;
+                granulePosition = _eofGranulePosition;
+                _eofFlag = -1;
             }
+        }
 
         var data = PerformAnalysis(pcm, pcmEnd);
-        packet = new OggPacket(data, eofFlag, _granulePosition, _sequence++);
+        packet = new OggPacket(data, eofFlag, granulePosition, _sequence++);
 
         if (!eofFlag)
             AdvanceStorageVectors(centerNext);
