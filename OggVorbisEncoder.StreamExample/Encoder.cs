@@ -27,23 +27,28 @@ public class Encoder
 
     private static void ConvertPCMToOggVorbis(Stream inputStream, Stream outputStream, int outputSampleRate, int outputChannels, PcmSample pcmSampleSize, int pcmSampleRate, int pcmChannels)
     {
-        byte[] pcm = new byte[WriteBufferSize];
+        int bytesPerSampleFrame = (int)pcmSampleSize * pcmChannels;
+        byte[] pcm = new byte[WriteBufferSize * bytesPerSampleFrame];
+        int bufferedBytes = 0;
 
         InitOggStream(outputSampleRate, outputChannels, out OggStream oggStream, out ProcessingState processingState);
 
         while (true)
         {
-            int chunkSize = inputStream.Read(pcm, 0, WriteBufferSize);
-            if (chunkSize <= 0)
+            int bytesRead = inputStream.Read(pcm, bufferedBytes, pcm.Length - bufferedBytes);
+            if (bytesRead <= 0)
                 break;
 
-            int numPcmSamples = chunkSize / (int)pcmSampleSize / pcmChannels;
-            float pcmDuraton = numPcmSamples / (float)pcmSampleRate;
+            bufferedBytes += bytesRead;
+            int completeFrames = bufferedBytes / bytesPerSampleFrame;
+            if (completeFrames == 0)
+                continue;
 
-            int numOutputSamples = (int)(pcmDuraton * outputSampleRate);
+            int bytesToProcess = completeFrames * bytesPerSampleFrame;
+            int numPcmSamples = completeFrames;
+            int numOutputSamples = (int)((long)numPcmSamples * outputSampleRate / pcmSampleRate);
 
             float[][] outSamples = new float[outputChannels][];
-
             for (int ch = 0; ch < outputChannels; ch++)
             {
                 outSamples[ch] = new float[numOutputSamples];
@@ -77,6 +82,20 @@ public class Encoder
 
             FlushPages(oggStream, outputStream, false);
             ProcessChunk(outSamples, processingState, oggStream, numOutputSamples);
+
+            bufferedBytes -= bytesToProcess;
+            if (bufferedBytes > 0)
+            {
+                Buffer.BlockCopy(pcm, bytesToProcess, pcm, 0, bufferedBytes);
+            }
+        }
+
+        processingState.WriteEndOfStream();
+
+        while (!oggStream.Finished && processingState.PacketOut(out OggPacket packet))
+        {
+            oggStream.PacketIn(packet);
+            FlushPages(oggStream, outputStream, false);
         }
 
         FlushPages(oggStream, outputStream, true);
