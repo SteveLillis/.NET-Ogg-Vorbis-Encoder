@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.IO;
+using NVorbis;
 using Xunit;
 
 namespace OggVorbisEncoder.Tests;
@@ -22,6 +23,35 @@ public class GranulePositionTests
         long granulePosition = ReadEndOfStreamGranulePosition(oggData);
 
         Assert.Equal(totalSamples, granulePosition);
+    }
+
+    [Fact]
+    public void DecoderReadsExactSampleCount()
+    {
+        const int sampleRate = 44100;
+        const int channels = 2;
+        const int durationSeconds = 2;
+        const int chunkSize = 512;
+
+        int totalSamples = sampleRate * durationSeconds;
+        float[][] samples = CreateSilence(channels, totalSamples);
+
+        byte[] oggData = Encode(samples, sampleRate, channels, chunkSize);
+
+        using var input = new MemoryStream(oggData);
+        using var reader = new VorbisReader(input, false);
+
+        Assert.Equal(sampleRate, reader.SampleRate);
+        Assert.Equal(channels, reader.Channels);
+        Assert.Equal(totalSamples, reader.TotalSamples);
+
+        float[] buffer = new float[4096 * channels];
+
+        while (reader.ReadSamples(buffer, 0, buffer.Length) > 0)
+        {
+        }
+
+        Assert.Equal(reader.TotalSamples, reader.SamplePosition);
     }
 
     private static float[][] CreateSilence(int channels, int totalSamples)
